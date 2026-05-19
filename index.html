@@ -3388,6 +3388,401 @@
         right: 12px;
       }
     }
+
+    @media (min-width: 768px) and (max-width: 1180px) {
+      .app {
+        padding: 10px;
+      }
+
+      .screen {
+        max-width: 100%;
+        min-height: calc(100dvh - 20px);
+        gap: 10px;
+      }
+
+      .topbar {
+        min-height: 48px;
+      }
+
+      h1 {
+        font-size: clamp(2.2rem, 6vw, 4.2rem);
+      }
+
+      h2 {
+        font-size: clamp(1.25rem, 3vw, 2rem);
+      }
+
+      .big-button {
+        min-height: 48px;
+        padding: 10px 14px;
+        font-size: clamp(1.08rem, 2.8vw, 1.7rem);
+      }
+
+      .small-button {
+        min-height: 44px;
+      }
+
+      .title-art {
+        min-height: min(58vh, 440px);
+      }
+
+      .title-wash-bay {
+        top: 44px;
+        left: 5%;
+        width: min(60%, 430px);
+        height: 310px;
+      }
+
+      .portal-top {
+        height: 88px;
+      }
+
+      .portal-top::before {
+        top: 18px;
+        height: 40px;
+        font-size: 1.05rem;
+      }
+
+      .portal-column {
+        top: 66px;
+      }
+
+      .portal-opening {
+        top: 90px;
+        bottom: 28px;
+      }
+
+      .title-bay-light {
+        top: 84px;
+      }
+
+      .title-bay-brush {
+        top: 120px;
+        height: 132px;
+      }
+
+      .title-foam {
+        bottom: 150px;
+        transform: scale(0.82);
+        transform-origin: left bottom;
+      }
+
+      .title-rail {
+        bottom: 58px;
+      }
+
+      .title-art .wash-sign {
+        top: 18px;
+        right: 18px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+        gap: 10px;
+      }
+
+      .car-card {
+        min-height: 180px;
+        padding: 8px;
+      }
+
+      .car-card img {
+        max-height: 114px;
+      }
+
+      .drive-scene,
+      .exit-scene,
+      .parade-scene {
+        min-height: min(62vh, 520px);
+      }
+
+      .city-layer {
+        bottom: 210px;
+        transform: scale(0.86);
+        transform-origin: center bottom;
+      }
+
+      .wash-building {
+        right: 34px;
+        bottom: 150px;
+        width: min(32vw, 310px);
+        height: 238px;
+      }
+
+      .wash-portal-roof {
+        height: 62px;
+      }
+
+      .wash-portal-column {
+        top: 48px;
+        bottom: 16px;
+      }
+
+      .wash-portal-opening {
+        top: 66px;
+        bottom: 28px;
+      }
+
+      .wash-portal-brush {
+        top: 88px;
+        height: 94px;
+      }
+
+      .road-line {
+        bottom: 126px;
+      }
+
+      .drive-car-wrap,
+      .exit-car-wrap {
+        bottom: 52px;
+        width: clamp(220px, 28vw, 310px);
+        height: clamp(138px, 17vw, 194px);
+      }
+
+      .reception-layout {
+        grid-template-columns: minmax(430px, 1.1fr) minmax(300px, 0.9fr);
+        gap: 10px;
+      }
+
+      .terminal-panel,
+      .kiosk-panel {
+        padding: 10px;
+      }
+
+      .terminal-steps span {
+        min-height: 38px;
+        font-size: 0.85rem;
+      }
+
+      .terminal-title {
+        padding: 10px 14px 6px;
+        font-size: 1.45rem;
+      }
+
+      .terminal-section {
+        padding: 0 12px 12px;
+      }
+
+      .choice-button.course-card {
+        min-height: 132px;
+        grid-template-rows: auto 50px auto;
+      }
+
+      .course-art {
+        height: 50px;
+      }
+
+      .course-price {
+        font-size: 1.55rem;
+      }
+
+      .pay-yard {
+        min-height: 340px;
+      }
+
+      .pay-machine {
+        top: 32px;
+        right: 18px;
+        width: 206px;
+        height: 286px;
+      }
+
+      .pay-screen {
+        width: 122px;
+        height: 78px;
+      }
+
+      .machine-slot {
+        top: 122px;
+        width: 104px;
+      }
+
+      .machine-touch {
+        top: 178px;
+        width: 94px;
+        height: 66px;
+      }
+
+      .machine-receipt {
+        right: 14px;
+        height: 72px;
+      }
+
+      .pay-target[data-method="cash"] {
+        top: 116px;
+      }
+
+      .pay-target[data-method="phone"],
+      .pay-target[data-method="card"] {
+        top: 168px;
+      }
+
+      .pay-help {
+        right: 250px;
+        font-size: 0.92rem;
+      }
+
+      .pay-item {
+        width: 132px;
+        height: 132px;
+      }
+
+      .pay-item .coin {
+        width: 112px;
+        height: 112px;
+      }
+
+      .pay-item .phone {
+        width: 72px;
+        height: 116px;
+      }
+
+      .pay-item .card-icon {
+        width: 120px;
+        height: 80px;
+      }
+
+      .wash-scene {
+        min-height: min(62vh, 510px);
+      }
+
+      .traffic-light {
+        transform: scale(0.82);
+        transform-origin: left top;
+      }
+
+      .wash-rail {
+        bottom: 40px;
+        height: 54px;
+      }
+
+      .wash-gate,
+      .wash-front-frame {
+        top: 82px;
+        width: min(64vw, 610px);
+        height: 350px;
+      }
+
+      .wash-gate::before {
+        top: 14px;
+        height: 46px;
+        font-size: 1.05rem;
+      }
+
+      .wash-gate::after {
+        top: 72px;
+        bottom: 48px;
+      }
+
+      .bay-light {
+        top: 78px;
+      }
+
+      .top-nozzle {
+        top: 98px;
+        height: 34px;
+      }
+
+      .brush {
+        top: 132px;
+        height: 180px;
+        width: 58px;
+      }
+
+      .machine-floor {
+        height: 56px;
+      }
+
+      .wash-front-frame::before,
+      .wash-front-frame::after {
+        top: 72px;
+        bottom: 56px;
+      }
+
+      .wash-car {
+        top: 168px;
+        width: min(30vw, 280px);
+        min-width: 210px;
+      }
+
+      .wash-car.side-exit {
+        top: 258px;
+        width: min(34vw, 310px);
+        height: 184px;
+      }
+
+      .wash-scene .foam-layer,
+      .wash-scene .spray-layer,
+      .wash-scene .dry-layer,
+      .wash-scene .shine-layer {
+        top: 152px;
+        width: min(48vw, 400px);
+        height: 248px;
+        margin-left: max(-24vw, -200px);
+      }
+
+      .wash-steps {
+        gap: 6px;
+      }
+
+      .wash-step {
+        min-height: 44px;
+        font-size: 0.92rem;
+      }
+
+      .scene-caption {
+        min-height: 46px;
+        font-size: clamp(1rem, 2.4vw, 1.35rem);
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+      .title-wrap,
+      .reception-layout,
+      .complete-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .title-art {
+        min-height: 430px;
+        order: 2;
+      }
+
+      .title-menu {
+        order: 1;
+      }
+
+      .drive-scene,
+      .exit-scene,
+      .wash-scene {
+        min-height: 560px;
+      }
+
+      .reception-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .pay-help {
+        right: 250px;
+      }
+
+      .wash-gate,
+      .wash-front-frame {
+        width: min(82vw, 650px);
+      }
+
+      .wash-car {
+        width: min(42vw, 300px);
+      }
+
+      .wash-scene .foam-layer,
+      .wash-scene .spray-layer,
+      .wash-scene .dry-layer,
+      .wash-scene .shine-layer {
+        width: min(62vw, 440px);
+        margin-left: max(-31vw, -220px);
+      }
+    }
   </style>
 </head>
 <body>
