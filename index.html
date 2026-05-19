@@ -1,0 +1,4234 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ぴかぴか せんしゃ</title>
+  <style>
+    :root {
+      --sky: #dff6ff;
+      --blue: #2d8bd8;
+      --deep-blue: #1765a7;
+      --green: #35a853;
+      --yellow: #ffd45c;
+      --orange: #ff8f45;
+      --pink: #ff84a9;
+      --ink: #28323f;
+      --paper: #fffaf0;
+      --panel: #ffffff;
+      --line: #293241;
+      --shadow: 0 10px 0 rgba(41, 50, 65, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      color: var(--ink);
+      background:
+        linear-gradient(#dff6ff 0 58%, #c8f0d2 58% 100%);
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+      letter-spacing: 0;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+      max-width: 1180px;
+      min-height: calc(100vh - 32px);
+      margin: 0 auto;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      color: #f05252;
+      font-size: clamp(2.3rem, 7vw, 5.8rem);
+      line-height: 0.95;
+      text-align: center;
+      text-shadow: 0 5px 0 #fff, 0 9px 0 rgba(41, 50, 65, 0.18);
+    }
+
+    h2 {
+      font-size: clamp(1.45rem, 4vw, 2.5rem);
+      line-height: 1.05;
+      text-align: center;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      line-height: 1.2;
+    }
+
+    .big-button,
+    .small-button,
+    .choice-button {
+      min-height: 54px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 6px 0 rgba(41, 50, 65, 0.2);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .big-button:active,
+    .small-button:active,
+    .choice-button:active,
+    .car-card:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(41, 50, 65, 0.2);
+    }
+
+    .big-button {
+      width: min(420px, 100%);
+      padding: 14px 18px;
+      font-size: clamp(1.25rem, 4vw, 2.1rem);
+      font-weight: 800;
+    }
+
+    .small-button {
+      min-width: 112px;
+      padding: 9px 13px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .choice-button {
+      padding: 11px 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .choice-button.is-selected {
+      background: var(--yellow);
+    }
+
+    .choice-button:disabled,
+    .big-button:disabled {
+      color: #8c99a7;
+      background: #e9eef3;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 4px 0 rgba(41, 50, 65, 0.1);
+    }
+
+    .title-screen {
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .title-wrap {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) minmax(260px, 420px);
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .title-art {
+      min-height: 520px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(#9ee1ff 0 58%, #707a86 58% 79%, #65c56f 79% 100%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .title-art::before {
+      content: "";
+      position: absolute;
+      inset: 58% 0 auto;
+      height: 10px;
+      background: repeating-linear-gradient(90deg, #fff 0 56px, transparent 56px 116px);
+      opacity: 0.95;
+    }
+
+    .title-art .car {
+      position: absolute;
+      left: 50%;
+      bottom: 86px;
+      width: min(72%, 500px);
+      transform: translateX(-50%);
+      border-radius: 8px;
+      filter: drop-shadow(0 16px 6px rgba(0, 0, 0, 0.22));
+    }
+
+    .title-art .wash-sign {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      padding: 10px 14px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #fff7aa;
+      font-weight: 900;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      transform: rotate(3deg);
+    }
+
+    .title-menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .title-menu .big-button:nth-child(1) { background: #fff27a; }
+    .title-menu .big-button:nth-child(2) { background: #bdf4c8; }
+    .title-menu .big-button:nth-child(3) { background: #ffcfdf; }
+    .title-menu .big-button:nth-child(4) { background: #d7dce2; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .car-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 206px;
+      padding: 10px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 6px 0 rgba(41, 50, 65, 0.14);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .car-card img {
+      width: 100%;
+      max-height: 138px;
+      object-fit: contain;
+      border: 2px solid rgba(41, 50, 65, 0.18);
+      border-radius: 6px;
+      background: #eef6ff;
+    }
+
+    .car-card strong {
+      font-size: 1.07rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .car-card p {
+      font-size: 0.92rem;
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    .no-image {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-height: 138px;
+      border: 2px dashed #8392a4;
+      border-radius: 6px;
+      background: #eef4f8;
+      color: #657383;
+      font-weight: 900;
+    }
+
+    .drive-scene,
+    .wash-scene,
+    .parade-scene {
+      position: relative;
+      width: 100%;
+      min-height: 620px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #9fe3ff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .drive-scene {
+      background:
+        linear-gradient(#9fe3ff 0 48%, #c8efd4 48% 62%, #5f6875 62% 100%);
+    }
+
+    .sun {
+      position: absolute;
+      top: 34px;
+      left: 42px;
+      width: 90px;
+      height: 90px;
+      border: 4px solid var(--line);
+      border-radius: 50%;
+      background: #ffd45c;
+      box-shadow: 0 0 0 12px rgba(255, 212, 92, 0.35);
+    }
+
+    .cloud {
+      position: absolute;
+      width: 160px;
+      height: 54px;
+      border: 3px solid rgba(41, 50, 65, 0.36);
+      border-radius: 40px;
+      background: #ffffff;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      bottom: 18px;
+      width: 74px;
+      height: 74px;
+      border: 3px solid rgba(41, 50, 65, 0.36);
+      border-bottom: 0;
+      border-radius: 50% 50% 0 0;
+      background: #ffffff;
+    }
+
+    .cloud::before { left: 22px; }
+    .cloud::after { right: 18px; width: 62px; height: 62px; }
+    .cloud.one { top: 60px; right: 11%; }
+    .cloud.two { top: 160px; left: 26%; transform: scale(0.78); }
+
+    .road-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 150px;
+      height: 13px;
+      background: repeating-linear-gradient(90deg, #fff 0 68px, transparent 68px 136px);
+      animation: roadLine 900ms linear infinite;
+    }
+
+    @keyframes roadLine {
+      from { background-position-x: 0; }
+      to { background-position-x: -136px; }
+    }
+
+    .wash-building {
+      position: absolute;
+      right: 46px;
+      bottom: 185px;
+      width: min(30vw, 270px);
+      min-width: 190px;
+      height: 190px;
+      border: 4px solid var(--line);
+      border-radius: 8px 8px 0 0;
+      background: #fdf3c5;
+      display: grid;
+      place-items: start center;
+      padding-top: 16px;
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+
+    .wash-building::before {
+      content: "";
+      position: absolute;
+      left: 30px;
+      right: 30px;
+      bottom: 0;
+      height: 110px;
+      border: 4px solid var(--line);
+      border-bottom: 0;
+      border-radius: 8px 8px 0 0;
+      background: #65b7ff;
+    }
+
+    .wash-building::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -28px;
+      height: 34px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: repeating-linear-gradient(90deg, #ff6666 0 42px, #fff 42px 84px);
+    }
+
+    .drive-car-wrap {
+      position: absolute;
+      left: -290px;
+      bottom: 72px;
+      width: clamp(230px, 30vw, 350px);
+      height: clamp(145px, 20vw, 225px);
+      overflow: hidden;
+      border-radius: 8px;
+      filter: drop-shadow(0 12px 6px rgba(0, 0, 0, 0.24));
+    }
+
+    .drive-car-wrap.go {
+      animation: driveIn 5s ease-in-out forwards;
+    }
+
+    .drive-car-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 8px;
+      display: block;
+    }
+
+    .drive-car-wrap.dirty img {
+      filter: sepia(0.35) saturate(0.75) brightness(0.85);
+    }
+
+    .drive-car-wrap.dirty::after {
+      content: "";
+      position: absolute;
+      inset: 21% 18% 16% 13%;
+      background:
+        radial-gradient(circle at 20% 35%, rgba(111, 75, 40, 0.55) 0 7px, transparent 8px),
+        radial-gradient(circle at 48% 52%, rgba(111, 75, 40, 0.44) 0 10px, transparent 11px),
+        radial-gradient(circle at 70% 40%, rgba(111, 75, 40, 0.5) 0 7px, transparent 8px),
+        radial-gradient(circle at 33% 68%, rgba(111, 75, 40, 0.42) 0 9px, transparent 10px);
+      pointer-events: none;
+    }
+
+    @keyframes driveIn {
+      0% { transform: translateX(0) rotate(-1deg); }
+      58% { transform: translateX(calc(55vw - 80px)) rotate(1deg); }
+      100% { transform: translateX(calc(100vw - 430px)) rotate(0deg); }
+    }
+
+    .scene-caption {
+      display: grid;
+      place-items: center;
+      min-height: 58px;
+      padding: 8px 14px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      font-size: clamp(1.15rem, 3vw, 1.8rem);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .reception-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.05fr) minmax(280px, 0.95fr);
+      gap: 14px;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .panel {
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .panel h3 {
+      margin-bottom: 10px;
+    }
+
+    .course-grid,
+    .option-grid,
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .payment-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .total-board {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: #eafaf0;
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .pay-yard {
+      position: relative;
+      min-height: 360px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(#e8f6ff 0 52%, #e2e7ed 52% 100%);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .pay-machine {
+      position: absolute;
+      right: 20px;
+      top: 34px;
+      width: 190px;
+      height: 255px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #fdf3c5;
+      box-shadow: 0 8px 0 rgba(41, 50, 65, 0.15);
+    }
+
+    .pay-machine::before {
+      content: "";
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      top: 24px;
+      height: 72px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: #89dbff;
+    }
+
+    .pay-target {
+      position: absolute;
+      right: 42px;
+      top: 142px;
+      display: grid;
+      place-items: center;
+      width: 144px;
+      height: 82px;
+      border: 4px dashed #f05252;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .pay-item {
+      position: absolute;
+      left: 30px;
+      top: 108px;
+      display: grid;
+      place-items: center;
+      width: 112px;
+      height: 112px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 8px 0 rgba(41, 50, 65, 0.16);
+      cursor: grab;
+      touch-action: none;
+      z-index: 4;
+    }
+
+    .pay-item:active {
+      cursor: grabbing;
+    }
+
+    .pay-item.is-paid {
+      animation: paidPop 420ms ease both;
+    }
+
+    @keyframes paidPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.18) rotate(-4deg); }
+      100% { transform: scale(1); }
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      border: 4px solid #b87915;
+      border-radius: 50%;
+      background: #ffd45c;
+      font-size: 1.3rem;
+      font-weight: 900;
+    }
+
+    .phone {
+      width: 58px;
+      height: 88px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #9ee1ff;
+      position: relative;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 12px;
+      height: 44px;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .phone::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: 8px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--line);
+    }
+
+    .card-icon {
+      display: grid;
+      align-content: center;
+      width: 86px;
+      height: 58px;
+      padding: 8px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #ffcfdf;
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    .card-icon::before {
+      content: "";
+      display: block;
+      height: 10px;
+      margin-bottom: 8px;
+      background: var(--line);
+    }
+
+    .pay-help {
+      position: absolute;
+      left: 18px;
+      right: 230px;
+      top: 22px;
+      min-height: 52px;
+      padding: 9px 12px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .start-wash-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .wash-scene {
+      min-height: 650px;
+      background:
+        linear-gradient(#a5e6ff 0 36%, #ecf8ff 36% 73%, #616a76 73% 100%);
+    }
+
+    .traffic-light {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      z-index: 6;
+      width: 122px;
+      padding: 10px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #27313e;
+      color: #fff;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .light-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .light {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #111923;
+      border-radius: 50%;
+      background: #59616d;
+    }
+
+    .light.red.on {
+      background: #ff4a4a;
+      box-shadow: 0 0 14px #ff4a4a;
+    }
+
+    .light.green.on {
+      background: #4be26d;
+      box-shadow: 0 0 14px #4be26d;
+    }
+
+    .wash-gate {
+      position: absolute;
+      left: 50%;
+      top: 70px;
+      width: min(62vw, 640px);
+      height: 470px;
+      transform: translateX(-50%);
+      border: 7px solid var(--line);
+      border-bottom: 0;
+      border-radius: 8px 8px 0 0;
+      background: #d7e3ef;
+      overflow: hidden;
+    }
+
+    .wash-gate::before {
+      content: "せんしゃき";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      display: grid;
+      place-items: center;
+      height: 58px;
+      border-bottom: 5px solid var(--line);
+      background: #fff27a;
+      font-size: 1.5rem;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .machine-floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 80px;
+      background: repeating-linear-gradient(90deg, #a9b5c1 0 28px, #808c99 28px 56px);
+      border-top: 4px solid var(--line);
+    }
+
+    .brush {
+      position: absolute;
+      top: 84px;
+      width: 72px;
+      height: 250px;
+      border: 4px solid var(--line);
+      border-radius: 40px;
+      background: repeating-linear-gradient(0deg, #ff82a6 0 14px, #67c2ff 14px 28px, #fff27a 28px 42px);
+      z-index: 4;
+      opacity: 0.2;
+    }
+
+    .brush.left { left: 54px; }
+    .brush.right { right: 54px; }
+    .wash-scene.brush-on .brush {
+      opacity: 1;
+      animation: brushSpin 260ms linear infinite;
+    }
+
+    @keyframes brushSpin {
+      from { background-position-y: 0; }
+      to { background-position-y: 42px; }
+    }
+
+    .foam-layer,
+    .spray-layer,
+    .dry-layer,
+    .shine-layer {
+      position: absolute;
+      inset: 62px 0 70px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 5;
+    }
+
+    .wash-scene.foam-on .foam-layer {
+      opacity: 1;
+      background:
+        radial-gradient(circle at 18% 64%, rgba(255,255,255,0.95) 0 20px, transparent 21px),
+        radial-gradient(circle at 36% 48%, rgba(255,255,255,0.95) 0 26px, transparent 27px),
+        radial-gradient(circle at 58% 59%, rgba(255,255,255,0.92) 0 22px, transparent 23px),
+        radial-gradient(circle at 74% 44%, rgba(255,255,255,0.92) 0 28px, transparent 29px),
+        radial-gradient(circle at 88% 68%, rgba(255,255,255,0.95) 0 20px, transparent 21px);
+      animation: foamFloat 900ms ease-in-out infinite alternate;
+    }
+
+    @keyframes foamFloat {
+      from { transform: translateY(8px); }
+      to { transform: translateY(-10px); }
+    }
+
+    .wash-scene.spray-on .spray-layer {
+      opacity: 1;
+      background: repeating-linear-gradient(115deg, transparent 0 16px, rgba(61, 181, 255, 0.72) 16px 22px);
+      animation: waterFall 420ms linear infinite;
+    }
+
+    @keyframes waterFall {
+      from { background-position: 0 0; }
+      to { background-position: 0 44px; }
+    }
+
+    .wash-scene.dry-on .dry-layer {
+      opacity: 1;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 26px, rgba(255,255,255,0.9) 26px 33px);
+      animation: wind 360ms linear infinite;
+    }
+
+    @keyframes wind {
+      from { transform: translateX(-24px); }
+      to { transform: translateX(24px); }
+    }
+
+    .wash-scene.shine-on .shine-layer {
+      opacity: 1;
+      background:
+        radial-gradient(circle at 28% 36%, rgba(255,255,255,0.96) 0 5px, transparent 6px),
+        radial-gradient(circle at 54% 50%, rgba(255,255,255,0.96) 0 6px, transparent 7px),
+        radial-gradient(circle at 75% 30%, rgba(255,255,255,0.96) 0 5px, transparent 6px),
+        radial-gradient(circle at 62% 70%, rgba(255,255,255,0.96) 0 5px, transparent 6px);
+      animation: twinkle 620ms ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkle {
+      from { filter: brightness(0.8); transform: scale(0.98); }
+      to { filter: brightness(1.3); transform: scale(1.02); }
+    }
+
+    .wash-car {
+      position: absolute;
+      left: 50%;
+      bottom: 68px;
+      z-index: 3;
+      width: min(40vw, 360px);
+      min-width: 220px;
+      border-radius: 8px;
+      filter: drop-shadow(0 12px 6px rgba(0,0,0,0.24)) sepia(0.24) brightness(0.86);
+      transform: translateX(-50%) translateY(170px) scale(0.92);
+    }
+
+    .wash-car.entering {
+      animation: carEnter 2.6s ease-out forwards;
+    }
+
+    .wash-car.clean {
+      filter: drop-shadow(0 12px 6px rgba(0,0,0,0.24)) brightness(1.12) saturate(1.15);
+    }
+
+    .wash-car.leaving {
+      animation: carLeave 2.8s ease-in forwards;
+    }
+
+    @keyframes carEnter {
+      from { transform: translateX(-50%) translateY(170px) scale(0.92); }
+      to { transform: translateX(-50%) translateY(0) scale(0.92); }
+    }
+
+    @keyframes carLeave {
+      from { transform: translateX(-50%) translateY(0) scale(0.92); }
+      to { transform: translateX(78vw) translateY(0) scale(0.92); }
+    }
+
+    .sparkle-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      transform: translate(-50%, -50%);
+      animation: sparklePop 680ms ease-out forwards;
+    }
+
+    .sparkle::before,
+    .sparkle::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 0;
+      width: 3px;
+      height: 18px;
+      border-radius: 2px;
+      background: #fff27a;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    .sparkle::after {
+      transform: rotate(90deg);
+    }
+
+    @keyframes sparklePop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.5) rotate(160deg); }
+    }
+
+    .wash-steps {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .wash-step {
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .wash-step.is-active {
+      background: var(--yellow);
+      transform: translateY(-2px);
+    }
+
+    .complete-wrap {
+      display: grid;
+      grid-template-columns: minmax(260px, 520px) minmax(260px, 1fr);
+      gap: 18px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .complete-car {
+      width: 100%;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      filter: brightness(1.13) saturate(1.14);
+    }
+
+    .complete-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+    }
+
+    .complete-message h2 {
+      color: #f05252;
+      font-size: clamp(2.2rem, 7vw, 5rem);
+      text-shadow: 0 5px 0 #fff;
+    }
+
+    .complete-message p {
+      font-size: clamp(1.3rem, 4vw, 2.2rem);
+      font-weight: 900;
+    }
+
+    .parade-scene {
+      min-height: 620px;
+      background:
+        linear-gradient(#9fe3ff 0 46%, #bde7c2 46% 66%, #59636f 66% 100%);
+    }
+
+    .parade-stage {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 85px;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .parade-car {
+      position: absolute;
+      left: -240px;
+      bottom: calc(var(--row) * 28px);
+      width: clamp(150px, 20vw, 240px);
+      height: clamp(105px, 13vw, 150px);
+      object-fit: cover;
+      object-position: center;
+      border-radius: 8px;
+      filter: drop-shadow(0 10px 5px rgba(0, 0, 0, 0.22));
+      animation: paradeRun 8.8s linear infinite;
+      animation-delay: calc(var(--i) * 0.72s);
+    }
+
+    @keyframes paradeRun {
+      0% { transform: translateX(-260px) rotate(-1deg); }
+      100% { transform: translateX(calc(100vw + 540px)) rotate(1deg); }
+    }
+
+    .parade-road-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 180px;
+      height: 14px;
+      background: repeating-linear-gradient(90deg, #fff 0 72px, transparent 72px 144px);
+      animation: roadLine 800ms linear infinite;
+    }
+
+    .end-screen {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 18px;
+    }
+
+    .end-box {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+      width: min(560px, 100%);
+      padding: 26px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .end-box p {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 900;
+      line-height: 1.4;
+    }
+
+    .terminal-panel {
+      padding: 10px;
+      background: #20242c;
+      border-color: #12161d;
+      box-shadow: 0 14px 0 rgba(18, 22, 29, 0.24);
+    }
+
+    .terminal-shell {
+      min-height: 100%;
+      border: 3px solid #06080b;
+      border-radius: 8px;
+      background: #f5f1e6;
+      overflow: hidden;
+    }
+
+    .terminal-steps {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      background: #303845;
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.96rem;
+    }
+
+    .terminal-steps span {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 46px;
+      padding: 6px 4px;
+      border-right: 2px solid rgba(255,255,255,0.3);
+      text-align: center;
+    }
+
+    .terminal-steps span.is-now {
+      background: #111923;
+      color: #fff27a;
+    }
+
+    .terminal-title {
+      padding: 14px 18px 8px;
+      color: #151a20;
+      font-size: clamp(1.4rem, 3vw, 2.15rem);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .terminal-section {
+      padding: 0 16px 16px;
+    }
+
+    .terminal-subtitle {
+      margin: 10px 0 8px;
+      color: #34404d;
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .terminal-panel .course-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .terminal-panel .option-grid,
+    .terminal-panel .payment-grid {
+      gap: 9px;
+    }
+
+    .choice-button.course-card {
+      display: grid;
+      grid-template-rows: auto 62px auto;
+      gap: 7px;
+      min-height: 154px;
+      padding: 10px;
+      color: #111923;
+      background: #d4d8df;
+      text-align: left;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.65), 0 5px 0 rgba(41, 50, 65, 0.2);
+    }
+
+    .choice-button.course-card.is-selected {
+      background: #fff6b7;
+      outline: 4px solid #ff8f45;
+      outline-offset: -7px;
+    }
+
+    .course-name {
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .course-art {
+      position: relative;
+      display: block;
+      height: 62px;
+      border: 2px solid rgba(17, 25, 35, 0.2);
+      border-radius: 6px;
+      background:
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,0.98) 0 4px, transparent 5px),
+        radial-gradient(circle at 78% 30%, rgba(255,255,255,0.98) 0 4px, transparent 5px),
+        linear-gradient(135deg, #007ad8, #00b8e6 60%, #6ee7ff);
+      overflow: hidden;
+    }
+
+    .course-art::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 13px;
+      width: 88px;
+      height: 24px;
+      transform: translateX(-50%);
+      border-radius: 16px 16px 7px 7px;
+      background: #12315f;
+      box-shadow: inset 0 5px 0 #8edcff;
+    }
+
+    .course-art::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      width: 118px;
+      height: 8px;
+      transform: translateX(-50%);
+      border-radius: 8px;
+      background: #0a2450;
+      box-shadow: -30px 6px 0 -2px #101820, 30px 6px 0 -2px #101820;
+    }
+
+    .course-price {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      color: #05080c;
+      font-size: clamp(1.45rem, 3vw, 2.35rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .course-price small {
+      font-size: 0.85rem;
+    }
+
+    .choice-button.option-card,
+    .choice-button.payment-card {
+      min-height: 50px;
+      background: #eef2f6;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.8), 0 4px 0 rgba(41,50,65,0.16);
+    }
+
+    .choice-button.option-card.is-selected,
+    .choice-button.payment-card.is-selected {
+      background: #bcebd0;
+    }
+
+    .terminal-panel .total-board {
+      margin: 12px 16px 16px;
+      background: #111923;
+      color: #fff;
+      border-color: #06080b;
+    }
+
+    .kiosk-panel {
+      background: #e8edf2;
+    }
+
+    .kiosk-panel h3 {
+      color: #1b2530;
+    }
+
+    .pay-yard {
+      min-height: 430px;
+      background:
+        linear-gradient(#d8e9f6 0 36%, #a9b3bd 36% 37%, #737d89 37% 100%);
+      border-color: #12161d;
+    }
+
+    .pay-yard::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 42%;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18) 0 2px, transparent 2px 64px),
+        linear-gradient(0deg, rgba(255,255,255,0.14) 0 2px, transparent 2px 54px);
+      opacity: 0.7;
+    }
+
+    .pay-machine {
+      right: 24px;
+      top: 44px;
+      width: 230px;
+      height: 318px;
+      border: 5px solid #111923;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, #191f28 0 76%, #c93032 76% 100%);
+      box-shadow: 0 14px 0 rgba(17,25,35,0.28);
+    }
+
+    .pay-machine::before {
+      left: 18px;
+      right: 62px;
+      top: 18px;
+      height: 116px;
+      border: 4px solid #080b10;
+      background:
+        linear-gradient(#253244 0 22%, #f4f0df 22% 100%);
+      box-shadow: inset 0 0 0 5px #2f3948;
+    }
+
+    .pay-machine::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      right: 78px;
+      bottom: 40px;
+      height: 12px;
+      border-radius: 8px;
+      background: #0b0e13;
+      box-shadow: 0 -42px 0 #334151, 0 -82px 0 #2c3541;
+    }
+
+    .pay-target {
+      right: 50px;
+      top: 188px;
+      width: 140px;
+      height: 86px;
+      border: 4px solid #111923;
+      background:
+        linear-gradient(#f9fbff, #d9e0ea);
+      box-shadow: inset 0 -8px 0 rgba(17,25,35,0.12);
+      color: #111923;
+    }
+
+    .pay-target::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 14px;
+      height: 9px;
+      border-radius: 9px;
+      background: #111923;
+    }
+
+    .pay-help {
+      left: 18px;
+      right: 285px;
+      top: 22px;
+      border-color: #12161d;
+      background: rgba(255,250,240,0.96);
+      box-shadow: 0 5px 0 rgba(17,25,35,0.16);
+    }
+
+    .pay-item {
+      width: 116px;
+      height: 116px;
+      background: #fffaf0;
+      border-color: #12161d;
+    }
+
+    .wash-scene {
+      min-height: 690px;
+      background:
+        linear-gradient(#bfd4df 0 19%, #f5f7f8 19% 20%, #e3e8ed 20% 70%, #5b646f 70% 100%);
+    }
+
+    .wash-scene::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 118px;
+      background:
+        repeating-linear-gradient(90deg, #aeb8c4 0 90px, #98a4b1 90px 180px);
+      border-bottom: 5px solid #313b47;
+      box-shadow: 0 14px 0 rgba(49,59,71,0.12);
+    }
+
+    .wash-rail {
+      position: absolute;
+      left: 50%;
+      bottom: 72px;
+      width: min(72vw, 760px);
+      height: 72px;
+      transform: translateX(-50%);
+      border-top: 5px solid #2b333d;
+      border-bottom: 5px solid #2b333d;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 48px, rgba(255,255,255,0.22) 48px 54px),
+        linear-gradient(#687380, #4d5661);
+      z-index: 1;
+    }
+
+    .wash-gate {
+      top: 112px;
+      width: min(68vw, 700px);
+      height: 468px;
+      border: 0;
+      border-radius: 26px 26px 8px 8px;
+      background:
+        linear-gradient(90deg, #bf2028 0 16%, #f4f7fa 16% 84%, #bf2028 84% 100%);
+      box-shadow:
+        inset 0 0 0 7px #8f141d,
+        inset 0 0 0 15px rgba(255,255,255,0.22),
+        0 18px 0 rgba(17,25,35,0.22);
+      z-index: auto;
+    }
+
+    .wash-gate::before {
+      content: "せんしゃ";
+      left: 18%;
+      right: 18%;
+      top: 18px;
+      height: 64px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, #172333, #2e4157 50%, #172333);
+      color: #fff;
+      text-shadow: 0 2px 0 #000;
+      box-shadow: 0 0 18px rgba(255, 242, 122, 0.55);
+    }
+
+    .wash-gate::after {
+      content: "";
+      position: absolute;
+      left: 19%;
+      right: 19%;
+      top: 92px;
+      bottom: 62px;
+      border: 5px solid #111923;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.12), transparent 18%, transparent 82%, rgba(255,255,255,0.12)),
+        linear-gradient(#263443, #111923);
+      box-shadow: inset 0 0 22px rgba(0,0,0,0.55);
+      z-index: 1;
+    }
+
+    .machine-floor {
+      height: 74px;
+      background:
+        repeating-linear-gradient(90deg, #313b47 0 30px, #55616f 30px 60px);
+      border-top: 5px solid #111923;
+      z-index: 8;
+    }
+
+    .bay-light {
+      position: absolute;
+      top: 101px;
+      left: 23%;
+      right: 23%;
+      height: 12px;
+      border-radius: 12px;
+      background: #fff6b7;
+      box-shadow: 0 0 22px rgba(255,246,183,0.9);
+      z-index: 7;
+    }
+
+    .top-nozzle {
+      position: absolute;
+      left: 28%;
+      right: 28%;
+      top: 128px;
+      height: 36px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      background: #d6dde5;
+      z-index: 6;
+    }
+
+    .top-nozzle::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: -12px;
+      height: 10px;
+      background: repeating-linear-gradient(90deg, #111923 0 10px, transparent 10px 26px);
+    }
+
+    .wash-front-frame {
+      position: absolute;
+      left: 50%;
+      top: 112px;
+      width: min(68vw, 700px);
+      height: 468px;
+      transform: translateX(-50%);
+      border-radius: 26px 26px 8px 8px;
+      pointer-events: none;
+      z-index: 7;
+      box-shadow:
+        inset 0 0 0 8px #8f141d,
+        inset 0 0 0 18px rgba(191,32,40,0.96);
+    }
+
+    .wash-front-frame::before,
+    .wash-front-frame::after {
+      content: "";
+      position: absolute;
+      top: 92px;
+      bottom: 72px;
+      width: 15%;
+      background:
+        linear-gradient(#e1353d, #aa1822);
+      border: 4px solid #7a1018;
+      box-shadow: inset 0 0 0 8px rgba(255,255,255,0.14);
+    }
+
+    .wash-front-frame::before {
+      left: 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .wash-front-frame::after {
+      right: 0;
+      border-radius: 8px 0 0 8px;
+    }
+
+    .brush {
+      top: 176px;
+      height: 238px;
+      width: 62px;
+      border-color: #111923;
+      background: repeating-linear-gradient(0deg, #e7eef7 0 12px, #4a8fd7 12px 24px, #e03b50 24px 36px);
+      z-index: 9;
+      opacity: 0.42;
+    }
+
+    .brush.left { left: 20%; }
+    .brush.right { right: 20%; }
+
+    .foam-layer,
+    .spray-layer,
+    .dry-layer,
+    .shine-layer {
+      inset: 142px 15% 76px;
+      z-index: 10;
+    }
+
+    .wash-car {
+      top: 212px;
+      bottom: auto;
+      z-index: 5;
+      width: min(35vw, 330px);
+      min-width: 230px;
+      filter: drop-shadow(0 14px 6px rgba(0,0,0,0.28)) sepia(0.24) brightness(0.86);
+      transform: translateX(-50%) translateY(0) scale(0.92);
+    }
+
+    .wash-car.clean {
+      filter: drop-shadow(0 14px 6px rgba(0,0,0,0.28)) brightness(1.15) saturate(1.16);
+    }
+
+    @keyframes carEnter {
+      from { transform: translateX(-50%) translateY(135px) scale(0.92); }
+      to { transform: translateX(-50%) translateY(0) scale(0.92); }
+    }
+
+    @keyframes carLeave {
+      from { transform: translateX(-50%) translateY(0) scale(0.92); }
+      to { transform: translateX(76vw) translateY(0) scale(0.92); }
+    }
+
+    .exit-scene {
+      position: relative;
+      width: 100%;
+      min-height: 620px;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(#aee9ff 0 45%, #c7ecd1 45% 62%, #5e6873 62% 100%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .exit-scene .wash-building {
+      left: 32px;
+      right: auto;
+      bottom: 188px;
+    }
+
+    .exit-car-wrap {
+      position: absolute;
+      left: 90px;
+      bottom: 76px;
+      width: clamp(230px, 30vw, 350px);
+      height: clamp(145px, 20vw, 225px);
+      overflow: hidden;
+      border-radius: 8px;
+      filter: drop-shadow(0 12px 6px rgba(0,0,0,0.24)) brightness(1.12) saturate(1.16);
+      transform: translateX(0);
+    }
+
+    .exit-car-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .exit-car-wrap.go {
+      animation: exitDrive 5s ease-in-out forwards;
+    }
+
+    @keyframes exitDrive {
+      0% { transform: translateX(0) rotate(0deg); }
+      45% { transform: translateX(32vw) rotate(-1deg); }
+      100% { transform: translateX(calc(100vw - 120px)) rotate(1deg); }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        padding: 10px;
+      }
+
+      .screen {
+        min-height: calc(100vh - 20px);
+      }
+
+      .title-wrap,
+      .reception-layout,
+      .complete-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .title-art {
+        min-height: 340px;
+        order: 2;
+      }
+
+      .title-menu {
+        order: 1;
+      }
+
+      .drive-scene,
+      .wash-scene,
+      .parade-scene,
+      .exit-scene {
+        min-height: 560px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .course-grid,
+      .option-grid,
+      .payment-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .terminal-steps {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        font-size: 0.82rem;
+      }
+
+      .terminal-panel .course-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pay-yard {
+        min-height: 460px;
+      }
+
+      .pay-help {
+        left: 12px;
+        right: 12px;
+        top: 12px;
+      }
+
+      .pay-machine {
+        right: 14px;
+        top: 146px;
+        width: 176px;
+        height: 285px;
+      }
+
+      .pay-target {
+        right: 32px;
+        top: 254px;
+        width: 128px;
+      }
+
+      .pay-item {
+        left: 22px;
+        top: 190px;
+      }
+
+      .wash-gate {
+        top: 118px;
+        width: 88vw;
+        height: 390px;
+      }
+
+      .wash-front-frame {
+        top: 118px;
+        width: 88vw;
+        height: 390px;
+      }
+
+      .wash-gate::before {
+        height: 52px;
+      }
+
+      .wash-gate::after {
+        top: 82px;
+        bottom: 56px;
+      }
+
+      .bay-light {
+        top: 90px;
+      }
+
+      .top-nozzle {
+        top: 114px;
+      }
+
+      .brush {
+        top: 152px;
+        height: 202px;
+      }
+
+      .brush.left { left: 18%; }
+      .brush.right { right: 18%; }
+
+      .wash-rail {
+        bottom: 54px;
+        width: 92vw;
+      }
+
+      .wash-car {
+        top: 198px;
+        width: min(48vw, 280px);
+      }
+
+      .exit-car-wrap {
+        left: 28px;
+        width: 240px;
+      }
+
+      .wash-steps {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .topbar {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .car-card {
+        min-height: 190px;
+      }
+
+      .drive-car-wrap {
+        width: 220px;
+      }
+
+      .wash-car {
+        width: 240px;
+      }
+
+      .terminal-title {
+        font-size: 1.35rem;
+      }
+
+      .choice-button.course-card {
+        min-height: 140px;
+      }
+
+      .pay-machine {
+        width: 158px;
+        right: 10px;
+      }
+
+      .pay-target {
+        right: 22px;
+        width: 126px;
+      }
+
+      .exit-car-wrap {
+        width: 220px;
+        left: 18px;
+      }
+    }
+
+    .title-art {
+      background:
+        linear-gradient(#9fe3ff 0 42%, #dde7ef 42% 43%, #8794a2 43% 100%);
+      isolation: isolate;
+    }
+
+    .title-art::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      height: auto;
+      background:
+        linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.28) 12% 13%, transparent 13% 100%),
+        linear-gradient(0deg, rgba(255,255,255,0.18) 0 2px, transparent 2px 58px);
+      opacity: 0.85;
+      z-index: 0;
+    }
+
+    .title-art::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 106px;
+      height: 20px;
+      background: repeating-linear-gradient(90deg, #fff 0 72px, transparent 72px 144px);
+      z-index: 1;
+    }
+
+    .title-wash-bay {
+      position: absolute;
+      left: 8%;
+      top: 78px;
+      width: min(56%, 490px);
+      height: 360px;
+      border-radius: 28px 28px 8px 8px;
+      background:
+        linear-gradient(90deg, #b91522 0 18%, #f5f7fa 18% 82%, #b91522 82% 100%);
+      box-shadow:
+        inset 0 0 0 8px #801019,
+        inset 0 0 0 18px rgba(255,255,255,0.2),
+        0 18px 0 rgba(17,25,35,0.25);
+      z-index: 2;
+    }
+
+    .title-wash-bay::before {
+      content: "せんしゃき";
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 18px;
+      display: grid;
+      place-items: center;
+      height: 56px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(90deg, #162337, #33485f, #162337);
+      font-weight: 900;
+      font-size: 1.4rem;
+    }
+
+    .title-wash-bay::after {
+      content: "";
+      position: absolute;
+      left: 20%;
+      right: 20%;
+      top: 92px;
+      bottom: 58px;
+      border: 5px solid #111923;
+      border-radius: 8px;
+      background: linear-gradient(#263443, #111923);
+      box-shadow: inset 0 0 28px rgba(0,0,0,0.58);
+    }
+
+    .title-bay-light {
+      position: absolute;
+      left: 24%;
+      right: 24%;
+      top: 102px;
+      height: 12px;
+      border-radius: 12px;
+      background: #fff6b7;
+      box-shadow: 0 0 24px rgba(255,246,183,0.95);
+      z-index: 4;
+    }
+
+    .title-bay-brush {
+      position: absolute;
+      top: 132px;
+      width: 42px;
+      height: 160px;
+      border: 4px solid #111923;
+      border-radius: 30px;
+      background: repeating-linear-gradient(0deg, #e7eef7 0 10px, #4a8fd7 10px 20px, #e03b50 20px 30px);
+      z-index: 5;
+      opacity: 0.92;
+    }
+
+    .title-bay-brush.left { left: 22%; }
+    .title-bay-brush.right { right: 22%; }
+
+    .title-foam {
+      position: absolute;
+      left: 15%;
+      bottom: 190px;
+      width: 260px;
+      height: 76px;
+      background:
+        radial-gradient(circle at 12% 62%, #fff 0 18px, transparent 19px),
+        radial-gradient(circle at 32% 34%, #fff 0 24px, transparent 25px),
+        radial-gradient(circle at 56% 60%, #fff 0 21px, transparent 22px),
+        radial-gradient(circle at 78% 40%, #fff 0 24px, transparent 25px);
+      filter: drop-shadow(0 8px 0 rgba(17,25,35,0.14));
+      z-index: 6;
+      animation: foamFloat 900ms ease-in-out infinite alternate;
+    }
+
+    .title-rail {
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      bottom: 82px;
+      height: 52px;
+      border-top: 4px solid #28313c;
+      border-bottom: 4px solid #28313c;
+      background: linear-gradient(#67727f, #4b5561);
+      z-index: 1;
+    }
+
+    .title-art .wash-sign {
+      top: 24px;
+      right: 24px;
+      z-index: 7;
+      background: #ffef7a;
+      box-shadow: 0 7px 0 rgba(17,25,35,0.2);
+    }
+
+    .title-art .car {
+      bottom: 36px;
+      width: min(64%, 500px);
+      height: min(38vw, 300px);
+      object-fit: cover;
+      object-position: center;
+      z-index: 8;
+    }
+
+    .drive-scene,
+    .exit-scene {
+      background:
+        linear-gradient(#99dfff 0 34%, #e6eef5 34% 35%, #ccd6df 35% 49%, #737f8c 49% 100%);
+    }
+
+    .drive-scene::before,
+    .exit-scene::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 128px;
+      background:
+        linear-gradient(90deg, #c9202c 0 18%, #f4f7fa 18% 82%, #c9202c 82% 100%);
+      border-bottom: 6px solid #111923;
+      box-shadow: 0 14px 0 rgba(17,25,35,0.16);
+      z-index: 1;
+    }
+
+    .drive-scene::after,
+    .exit-scene::after {
+      content: "せんしゃじょう";
+      position: absolute;
+      left: 50%;
+      top: 24px;
+      width: min(38vw, 360px);
+      height: 64px;
+      transform: translateX(-50%);
+      display: grid;
+      place-items: center;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(90deg, #172333, #33485f, #172333);
+      font-weight: 900;
+      font-size: clamp(1.1rem, 3vw, 2rem);
+      z-index: 2;
+    }
+
+    .drive-scene .sun,
+    .exit-scene .sun {
+      z-index: 0;
+      opacity: 0.85;
+    }
+
+    .drive-scene .cloud,
+    .exit-scene .cloud {
+      z-index: 0;
+    }
+
+    .wash-building {
+      right: 46px;
+      bottom: 178px;
+      width: min(34vw, 360px);
+      min-width: 230px;
+      height: 260px;
+      padding-top: 18px;
+      color: #fff;
+      background:
+        linear-gradient(90deg, #b91522 0 20%, #f5f7fa 20% 80%, #b91522 80% 100%);
+      text-shadow: 0 2px 0 #000;
+      box-shadow:
+        inset 0 0 0 8px #811018,
+        0 16px 0 rgba(17,25,35,0.22);
+      z-index: 4;
+    }
+
+    .wash-building::before {
+      left: 20%;
+      right: 20%;
+      bottom: 32px;
+      height: 148px;
+      border: 5px solid #111923;
+      background:
+        linear-gradient(#29394a, #111923);
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.52);
+    }
+
+    .wash-building::after {
+      top: -32px;
+      height: 38px;
+      background:
+        repeating-linear-gradient(90deg, #f9f9fb 0 44px, #c9202c 44px 88px);
+      box-shadow: 0 8px 0 rgba(17,25,35,0.15);
+    }
+
+    .course-art .water-jet,
+    .course-art .foam-dot,
+    .course-art .spark-dot,
+    .course-art .repel-arc {
+      position: absolute;
+      display: block;
+      pointer-events: none;
+    }
+
+    .course-art .water-jet {
+      top: -12px;
+      width: 9px;
+      height: 76px;
+      border-radius: 10px;
+      background: linear-gradient(rgba(255,255,255,0.9), rgba(66,194,255,0.8));
+      transform: rotate(24deg);
+      filter: blur(0.2px);
+    }
+
+    .course-art .water-jet.one { left: 26%; }
+    .course-art .water-jet.two { left: 47%; height: 82px; transform: rotate(0deg); }
+    .course-art .water-jet.three { right: 26%; transform: rotate(-24deg); }
+
+    .course-art .foam-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 18px -6px 0 rgba(255,255,255,0.82), 38px 3px 0 rgba(255,255,255,0.9);
+    }
+
+    .course-art .foam-dot.one { left: 18%; bottom: 13px; }
+    .course-art .foam-dot.two { right: 24%; bottom: 16px; transform: scale(0.9); }
+
+    .course-art .spark-dot {
+      width: 16px;
+      height: 16px;
+      transform: rotate(45deg);
+    }
+
+    .course-art .spark-dot::before,
+    .course-art .spark-dot::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 0;
+      width: 3px;
+      height: 16px;
+      border-radius: 3px;
+      background: #fff27a;
+      box-shadow: 0 0 9px #fff;
+    }
+
+    .course-art .spark-dot::after {
+      transform: rotate(90deg);
+    }
+
+    .course-art .spark-dot.one { top: 8px; left: 20%; }
+    .course-art .spark-dot.two { top: 13px; right: 18%; transform: scale(0.8) rotate(45deg); }
+    .course-art .spark-dot.three { bottom: 8px; right: 36%; transform: scale(0.7) rotate(45deg); }
+
+    .course-art .repel-arc {
+      left: 50%;
+      top: 14px;
+      width: 108px;
+      height: 34px;
+      transform: translateX(-50%);
+      border: 4px solid rgba(255,255,255,0.95);
+      border-bottom: 0;
+      border-radius: 80px 80px 0 0;
+      box-shadow: 0 0 12px rgba(255,255,255,0.65);
+    }
+
+    .course-art.premium-art {
+      background:
+        radial-gradient(circle at 18% 22%, #fff 0 5px, transparent 6px),
+        radial-gradient(circle at 80% 24%, #fff 0 5px, transparent 6px),
+        linear-gradient(135deg, #006ed0, #00c6e8 50%, #ffe178);
+    }
+
+    .payment-card {
+      display: grid;
+      grid-template-columns: 1fr 58px;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .pay-mini-icon {
+      position: relative;
+      display: block;
+      width: 54px;
+      height: 44px;
+      justify-self: end;
+    }
+
+    .cash-mini::before {
+      content: "";
+      position: absolute;
+      inset: 5px 9px;
+      border: 3px solid #a86b12;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), transparent 20%),
+        radial-gradient(circle, #ffe39a 0 42%, #e5a630 43% 100%);
+      box-shadow: 10px 4px 0 -1px #d99621;
+    }
+
+    .phone-mini::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 0;
+      width: 26px;
+      height: 44px;
+      border: 3px solid #111923;
+      border-radius: 7px;
+      background: linear-gradient(#8edcff 0 72%, #fff 72% 100%);
+    }
+
+    .phone-mini::after {
+      content: "";
+      position: absolute;
+      right: 1px;
+      top: 15px;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #2d8bd8;
+      border-left: 0;
+      border-bottom: 0;
+      transform: rotate(45deg);
+      border-radius: 4px;
+    }
+
+    .card-mini::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 8px;
+      width: 50px;
+      height: 32px;
+      border: 3px solid #111923;
+      border-radius: 7px;
+      background: linear-gradient(#ffcfdf 0 35%, #27313e 35% 52%, #ffcfdf 52% 100%);
+      box-shadow: 0 5px 0 rgba(17,25,35,0.14);
+    }
+
+    .pay-item {
+      width: 160px;
+      height: 160px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      filter: drop-shadow(0 14px 7px rgba(17,25,35,0.24));
+    }
+
+    .pay-item .coin {
+      width: 132px;
+      height: 132px;
+      border: 8px solid #a66b16;
+      background:
+        radial-gradient(circle at 32% 24%, rgba(255,255,255,0.98), transparent 17%),
+        radial-gradient(circle at 50% 50%, #ffe6a0 0 33%, #f4bf45 34% 61%, #c78319 62% 100%);
+      box-shadow:
+        inset 0 0 0 8px #f9d36b,
+        inset 0 0 0 18px rgba(166,107,22,0.32),
+        0 9px 0 #8e5a12;
+      font-size: 1.2rem;
+      color: #7a4b0d;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    }
+
+    .pay-item .coin::before {
+      content: "";
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      border: 5px solid rgba(122,75,13,0.65);
+      border-radius: 50%;
+    }
+
+    .pay-item .coin::after {
+      content: "";
+      position: absolute;
+      width: 72px;
+      height: 7px;
+      border-radius: 7px;
+      background: rgba(122,75,13,0.55);
+      box-shadow: 0 18px 0 rgba(122,75,13,0.42), 0 -18px 0 rgba(122,75,13,0.42);
+      transform: rotate(-18deg);
+    }
+
+    .coin-mark {
+      position: relative;
+      z-index: 2;
+      margin-top: 62px;
+      font-weight: 900;
+    }
+
+    .pay-item .phone {
+      width: 82px;
+      height: 132px;
+      border-width: 6px;
+      border-radius: 14px;
+      background:
+        linear-gradient(#182230 0 10%, #91e5ff 10% 76%, #f7fbff 76% 100%);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.2), 0 9px 0 rgba(17,25,35,0.18);
+    }
+
+    .pay-item .phone::before {
+      left: 12px;
+      right: 12px;
+      top: 28px;
+      height: 56px;
+      background:
+        radial-gradient(circle at 50% 50%, #fff 0 7px, transparent 8px),
+        linear-gradient(135deg, #2d8bd8, #9ee1ff);
+    }
+
+    .pay-item .phone::after {
+      left: 32px;
+      bottom: 12px;
+      width: 12px;
+      height: 12px;
+    }
+
+    .pay-item .card-icon {
+      width: 140px;
+      height: 92px;
+      padding: 14px;
+      border-width: 6px;
+      border-radius: 12px;
+      background:
+        linear-gradient(135deg, #ffcfdf, #ffe8ef 58%, #aee9ff);
+      box-shadow: 0 9px 0 rgba(17,25,35,0.18);
+      font-size: 1.1rem;
+    }
+
+    .brush {
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.55), transparent 28%, rgba(0,0,0,0.18) 72%, rgba(255,255,255,0.35)),
+        repeating-linear-gradient(0deg, #f1f6fb 0 8px, #5b9ee8 8px 18px, #d92842 18px 28px);
+      box-shadow:
+        inset 0 0 0 5px rgba(255,255,255,0.18),
+        0 16px 12px rgba(0,0,0,0.25);
+    }
+
+    .brush::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -16px;
+      bottom: -16px;
+      width: 10px;
+      transform: translateX(-50%);
+      border-radius: 10px;
+      background: #27313e;
+      box-shadow: 0 0 0 3px #8794a2;
+    }
+
+    .brush::after {
+      content: "";
+      position: absolute;
+      inset: 8px 10px;
+      border-radius: 32px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.42), transparent);
+      pointer-events: none;
+    }
+
+    .wash-scene.foam-on .foam-layer {
+      background:
+        radial-gradient(circle at 8% 70%, rgba(255,255,255,0.98) 0 18px, transparent 19px),
+        radial-gradient(circle at 18% 48%, rgba(255,255,255,0.96) 0 28px, transparent 29px),
+        radial-gradient(circle at 35% 62%, rgba(255,255,255,0.95) 0 24px, transparent 25px),
+        radial-gradient(circle at 52% 42%, rgba(255,255,255,0.94) 0 32px, transparent 33px),
+        radial-gradient(circle at 69% 63%, rgba(255,255,255,0.96) 0 24px, transparent 25px),
+        radial-gradient(circle at 86% 48%, rgba(255,255,255,0.98) 0 30px, transparent 31px);
+      filter: drop-shadow(0 8px 0 rgba(17,25,35,0.12));
+    }
+
+    .foam-layer::before,
+    .foam-layer::after {
+      content: "";
+      position: absolute;
+      inset: 18% 10%;
+      background:
+        radial-gradient(circle at 22% 40%, rgba(255,255,255,0.8) 0 9px, transparent 10px),
+        radial-gradient(circle at 42% 30%, rgba(255,255,255,0.7) 0 7px, transparent 8px),
+        radial-gradient(circle at 60% 54%, rgba(255,255,255,0.75) 0 10px, transparent 11px),
+        radial-gradient(circle at 75% 35%, rgba(255,255,255,0.72) 0 8px, transparent 9px);
+      animation: foamFloat 760ms ease-in-out infinite alternate;
+    }
+
+    .foam-layer::after {
+      inset: 34% 8% 8%;
+      transform: scale(0.82);
+      opacity: 0.8;
+      animation-delay: 180ms;
+    }
+
+    .wash-scene.spray-on .spray-layer {
+      background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,0.38), transparent),
+        repeating-linear-gradient(103deg, transparent 0 12px, rgba(91,205,255,0.72) 12px 18px, rgba(255,255,255,0.88) 18px 20px);
+      filter: blur(0.2px) drop-shadow(0 0 8px rgba(91,205,255,0.65));
+    }
+
+    .spray-layer::before {
+      content: "";
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: 0;
+      height: 42px;
+      background: radial-gradient(circle, rgba(255,255,255,0.96) 0 5px, transparent 6px) 0 0 / 38px 16px;
+      opacity: 0.9;
+    }
+
+    .wash-scene.dry-on .dry-layer {
+      background:
+        repeating-linear-gradient(0deg, transparent 0 20px, rgba(255,255,255,0.82) 20px 26px),
+        repeating-linear-gradient(90deg, transparent 0 32px, rgba(170,225,255,0.52) 32px 42px);
+      filter: blur(0.35px);
+    }
+
+    .wash-scene.shine-on .shine-layer {
+      background:
+        radial-gradient(circle at 16% 32%, rgba(255,255,255,0.98) 0 6px, transparent 7px),
+        radial-gradient(circle at 31% 70%, rgba(255,255,255,0.94) 0 5px, transparent 6px),
+        radial-gradient(circle at 49% 42%, rgba(255,255,255,0.98) 0 7px, transparent 8px),
+        radial-gradient(circle at 67% 61%, rgba(255,255,255,0.96) 0 5px, transparent 6px),
+        radial-gradient(circle at 84% 35%, rgba(255,255,255,0.98) 0 6px, transparent 7px);
+      filter: drop-shadow(0 0 10px rgba(255,242,122,0.9));
+    }
+
+    .wash-car.washing {
+      animation: carShake 190ms linear infinite;
+    }
+
+    @keyframes carShake {
+      0% { transform: translateX(calc(-50% - 2px)) translateY(0) rotate(-0.4deg) scale(0.92); }
+      50% { transform: translateX(calc(-50% + 2px)) translateY(1px) rotate(0.4deg) scale(0.92); }
+      100% { transform: translateX(calc(-50% - 1px)) translateY(0) rotate(-0.2deg) scale(0.92); }
+    }
+
+    .wash-car.side-exit {
+      top: 332px;
+      width: min(38vw, 370px);
+      height: 224px;
+      object-fit: cover;
+      object-position: center;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .wash-car.side-exit.leaving {
+      animation: sideCarLeave 2.8s ease-in forwards;
+    }
+
+    @keyframes sideCarLeave {
+      from { transform: translateX(-50%) translateY(0) scale(1); }
+      to { transform: translateX(78vw) translateY(0) scale(1); }
+    }
+
+    @media (max-width: 820px) {
+      .title-wash-bay {
+        left: 6%;
+        top: 70px;
+        width: 62%;
+        height: 250px;
+      }
+
+      .title-art .car {
+        width: 72%;
+        height: 220px;
+      }
+
+      .title-bay-brush {
+        height: 112px;
+      }
+
+      .drive-scene::after,
+      .exit-scene::after {
+        width: 66vw;
+      }
+
+      .wash-building {
+        right: 20px;
+        min-width: 210px;
+        height: 220px;
+      }
+
+      .payment-card {
+        grid-template-columns: 1fr 64px;
+      }
+
+      .pay-item {
+        width: 148px;
+        height: 148px;
+      }
+
+      .wash-car.side-exit {
+        top: 324px;
+        width: 280px;
+        height: 176px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .title-wash-bay {
+        width: 78%;
+        left: 4%;
+        height: 230px;
+      }
+
+      .title-art .car {
+        width: 82%;
+        height: 190px;
+      }
+
+      .wash-building {
+        min-width: 190px;
+        right: 10px;
+      }
+
+      .pay-item .coin {
+        width: 118px;
+        height: 118px;
+      }
+
+      .wash-car.side-exit {
+        top: 324px;
+        width: 245px;
+        height: 158px;
+      }
+    }
+
+    .title-wash-bay::before {
+      content: "Car Washer";
+      font-family: Arial, "Hiragino Maru Gothic ProN", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .title-art .wash-sign {
+      font-family: Arial, "Hiragino Maru Gothic ProN", sans-serif;
+      min-width: 152px;
+      text-align: center;
+    }
+
+    .drive-scene,
+    .exit-scene {
+      background:
+        linear-gradient(#9fe3ff 0 46%, #d7f1ff 46% 47%, #c8efd4 47% 61%, #65717d 61% 100%);
+    }
+
+    .drive-scene::before,
+    .exit-scene::before {
+      content: "";
+      top: 96px;
+      height: 190px;
+      border: 0;
+      background:
+        linear-gradient(90deg, transparent 0 4%, #f8d889 4% 11%, transparent 11% 14%, #b9d4ef 14% 22%, transparent 22% 27%, #f3a7a0 27% 35%, transparent 35% 40%, #c9d5df 40% 51%, transparent 51% 56%, #ffe4a3 56% 64%, transparent 64% 71%, #b7cee8 71% 82%, transparent 82% 100%),
+        linear-gradient(0deg, #7caf75 0 28px, transparent 28px 100%);
+      box-shadow: none;
+      z-index: 0;
+    }
+
+    .drive-scene::after,
+    .exit-scene::after {
+      content: "";
+      left: 0;
+      right: 0;
+      top: 210px;
+      width: auto;
+      height: 92px;
+      transform: none;
+      border: 0;
+      border-radius: 0;
+      background:
+        linear-gradient(135deg, transparent 0 48%, #a04444 48% 52%, transparent 52%) 6% 4px / 110px 52px no-repeat,
+        linear-gradient(#fff7d6, #fff7d6) 6% 50px / 110px 52px no-repeat,
+        linear-gradient(135deg, transparent 0 48%, #4e7fc3 48% 52%, transparent 52%) 22% 8px / 94px 45px no-repeat,
+        linear-gradient(#edf7ff, #edf7ff) 22% 51px / 94px 48px no-repeat,
+        linear-gradient(#a7b6c7, #8d9cac) 44% 12px / 82px 86px no-repeat,
+        linear-gradient(#c7d2df, #aebaca) 55% 2px / 104px 96px no-repeat,
+        linear-gradient(135deg, transparent 0 48%, #d97a36 48% 52%, transparent 52%) 72% 6px / 120px 54px no-repeat,
+        linear-gradient(#fff1d1, #fff1d1) 72% 58px / 120px 44px no-repeat;
+      z-index: 0;
+    }
+
+    .wash-building {
+      font-size: 0;
+      color: transparent;
+      right: 58px;
+      width: min(35vw, 390px);
+      height: 292px;
+      background:
+        linear-gradient(90deg, #a9121d 0 14%, #e8323c 14% 21%, #f5f7fa 21% 79%, #e8323c 79% 86%, #a9121d 86% 100%);
+      border-color: #111923;
+      box-shadow:
+        inset 0 0 0 8px #761018,
+        inset 0 0 0 18px rgba(255,255,255,0.18),
+        0 16px 0 rgba(17,25,35,0.22);
+    }
+
+    .wash-building::before {
+      left: 18%;
+      right: 18%;
+      bottom: 30px;
+      height: 174px;
+      border-width: 6px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.08), transparent 22%, transparent 78%, rgba(255,255,255,0.08)),
+        linear-gradient(#243343, #111923);
+    }
+
+    .wash-building::after {
+      top: -30px;
+      height: 36px;
+      background:
+        linear-gradient(90deg, #202936, #3b4d61 48%, #202936);
+      border-color: #111923;
+      box-shadow:
+        0 9px 0 rgba(17,25,35,0.18),
+        inset 0 0 18px rgba(255,242,122,0.62);
+    }
+
+    .drive-car-wrap,
+    .exit-car-wrap {
+      z-index: 9;
+    }
+
+    .phone-mini::before {
+      left: 10px;
+      top: 0;
+      width: 30px;
+      height: 46px;
+      border-width: 3px;
+      border-radius: 8px;
+      background:
+        linear-gradient(#172333 0 12%, #91e5ff 12% 76%, #fff 76% 100%);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.28);
+    }
+
+    .phone-mini::after {
+      right: 0;
+      top: 10px;
+      width: 24px;
+      height: 24px;
+      border: 4px solid #2d8bd8;
+      border-left: 0;
+      border-bottom: 0;
+      border-radius: 6px;
+      transform: rotate(45deg);
+      box-shadow: 8px -8px 0 -5px #2d8bd8, 15px -15px 0 -11px #2d8bd8;
+    }
+
+    .pay-machine {
+      background:
+        linear-gradient(90deg, #151b24 0 72%, #2a3340 72% 76%, #c9202c 76% 100%);
+    }
+
+    .pay-target {
+      overflow: hidden;
+      background:
+        linear-gradient(#ffffff, #d8e1eb);
+      align-items: end;
+      padding: 42px 8px 8px;
+    }
+
+    .pay-target[data-method="cash"]::before {
+      left: 18px;
+      right: 18px;
+      top: 18px;
+      height: 13px;
+      border-radius: 10px;
+      background: #111923;
+      box-shadow: 0 5px 0 rgba(255,255,255,0.42);
+    }
+
+    .pay-target[data-method="cash"]::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      width: 54px;
+      height: 54px;
+      transform: translateX(-50%);
+      border: 5px solid #a66b16;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 25%, rgba(255,255,255,0.9), transparent 18%),
+        radial-gradient(circle, #ffe39a 0 46%, #d99521 47% 100%);
+      opacity: 0.85;
+    }
+
+    .pay-target[data-method="phone"]::before,
+    .pay-target[data-method="card"]::before {
+      left: 18px;
+      top: 20px;
+      width: 46px;
+      height: 46px;
+      border: 5px solid #2d8bd8;
+      border-left: 0;
+      border-bottom: 0;
+      border-radius: 8px;
+      background: transparent;
+      transform: rotate(45deg);
+      box-shadow: 12px -12px 0 -7px #2d8bd8, 23px -23px 0 -17px #2d8bd8;
+    }
+
+    .pay-target[data-method="phone"]::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      bottom: 8px;
+      width: 38px;
+      height: 62px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      background:
+        linear-gradient(#172333 0 12%, #91e5ff 12% 74%, #fff 74% 100%);
+      opacity: 0.9;
+    }
+
+    .pay-target[data-method="card"]::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      bottom: 16px;
+      width: 72px;
+      height: 44px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      background:
+        linear-gradient(#ffcfdf 0 30%, #27313e 30% 48%, #ffcfdf 48% 100%);
+      opacity: 0.88;
+    }
+
+    .wash-gate::before {
+      content: "Car Washer";
+      font-family: Arial, "Hiragino Maru Gothic ProN", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .top-nozzle {
+      height: 42px;
+      background:
+        linear-gradient(#f0f4f8, #acb9c7);
+      box-shadow: inset 0 5px 0 rgba(255,255,255,0.72), 0 8px 0 rgba(17,25,35,0.18);
+      z-index: 20;
+    }
+
+    .top-nozzle::before {
+      content: "";
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: -32px;
+      height: 38px;
+      border: 6px solid #27313e;
+      border-bottom: 0;
+      border-radius: 28px 28px 0 0;
+      background: transparent;
+    }
+
+    .top-nozzle::after {
+      left: 7%;
+      right: 7%;
+      bottom: -15px;
+      height: 14px;
+      background:
+        radial-gradient(circle, #111923 0 5px, transparent 6px) 0 0 / 34px 14px;
+    }
+
+    .brush {
+      width: 76px;
+      border-radius: 42px;
+      background:
+        radial-gradient(ellipse at 34% 20%, rgba(255,255,255,0.65), transparent 24%),
+        repeating-linear-gradient(95deg, rgba(255,255,255,0.95) 0 4px, rgba(255,255,255,0) 4px 9px),
+        repeating-linear-gradient(0deg, #f7fbff 0 7px, #5b9ee8 7px 15px, #d92842 15px 24px);
+      box-shadow:
+        inset 0 0 0 4px rgba(255,255,255,0.25),
+        inset -12px 0 18px rgba(0,0,0,0.22),
+        0 18px 14px rgba(0,0,0,0.28);
+      z-index: 17;
+    }
+
+    .brush::after {
+      inset: -8px -12px;
+      border-radius: 48px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.74) 0 3px, transparent 3px 9px);
+      opacity: 0.72;
+      filter: blur(0.2px);
+    }
+
+    .foam-layer,
+    .spray-layer,
+    .dry-layer,
+    .shine-layer {
+      z-index: 19;
+    }
+
+    .wash-scene.foam-on .foam-layer {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.84), transparent 35%),
+        radial-gradient(circle at 12% 72%, rgba(255,255,255,1) 0 22px, transparent 23px),
+        radial-gradient(circle at 28% 50%, rgba(255,255,255,0.98) 0 34px, transparent 35px),
+        radial-gradient(circle at 48% 67%, rgba(255,255,255,0.96) 0 30px, transparent 31px),
+        radial-gradient(circle at 66% 45%, rgba(255,255,255,0.98) 0 38px, transparent 39px),
+        radial-gradient(circle at 86% 65%, rgba(255,255,255,1) 0 30px, transparent 31px);
+      animation: foamFloat 680ms ease-in-out infinite alternate;
+    }
+
+    .foam-layer::before {
+      inset: 0 8% 28%;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 24px, rgba(255,255,255,0.82) 24px 42px, transparent 42px 66px),
+        radial-gradient(circle at 20% 40%, #fff 0 10px, transparent 11px),
+        radial-gradient(circle at 42% 60%, #fff 0 8px, transparent 9px),
+        radial-gradient(circle at 68% 44%, #fff 0 11px, transparent 12px);
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.7));
+    }
+
+    .wash-scene.spray-on .spray-layer {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.28) 18%, transparent 68%),
+        repeating-linear-gradient(96deg, transparent 0 10px, rgba(79,196,255,0.82) 10px 16px, rgba(255,255,255,0.95) 16px 18px);
+      animation: waterFall 240ms linear infinite;
+      filter: blur(0.15px) drop-shadow(0 0 12px rgba(79,196,255,0.72));
+    }
+
+    .spray-layer::after {
+      content: "";
+      position: absolute;
+      inset: 38% 4% 8%;
+      background:
+        radial-gradient(circle at 12% 62%, rgba(255,255,255,0.86) 0 5px, transparent 6px),
+        radial-gradient(circle at 34% 42%, rgba(255,255,255,0.72) 0 4px, transparent 5px),
+        radial-gradient(circle at 56% 66%, rgba(255,255,255,0.82) 0 5px, transparent 6px),
+        radial-gradient(circle at 76% 45%, rgba(255,255,255,0.72) 0 4px, transparent 5px);
+      animation: mistMove 420ms linear infinite;
+    }
+
+    @keyframes mistMove {
+      from { transform: translateY(-4px); opacity: 0.72; }
+      to { transform: translateY(14px); opacity: 0.25; }
+    }
+
+    .wash-scene.dry-on .dry-layer {
+      background:
+        linear-gradient(90deg, rgba(255,205,120,0.2), rgba(255,255,255,0.78), rgba(255,205,120,0.22)),
+        repeating-linear-gradient(0deg, transparent 0 18px, rgba(255,255,255,0.86) 18px 26px),
+        repeating-linear-gradient(100deg, transparent 0 28px, rgba(255,220,150,0.45) 28px 42px);
+      animation: warmWind 300ms linear infinite;
+      filter: blur(0.35px) drop-shadow(0 0 12px rgba(255,205,120,0.55));
+    }
+
+    .dry-layer::before {
+      content: "";
+      position: absolute;
+      inset: 22% 4% 8%;
+      background:
+        radial-gradient(circle at 18% 62%, rgba(79,196,255,0.78) 0 5px, transparent 6px),
+        radial-gradient(circle at 35% 45%, rgba(79,196,255,0.62) 0 4px, transparent 5px),
+        radial-gradient(circle at 58% 66%, rgba(79,196,255,0.68) 0 5px, transparent 6px),
+        radial-gradient(circle at 82% 48%, rgba(79,196,255,0.62) 0 4px, transparent 5px);
+      animation: dropletsBlow 380ms linear infinite;
+    }
+
+    @keyframes warmWind {
+      from { transform: translateX(-28px); }
+      to { transform: translateX(30px); }
+    }
+
+    @keyframes dropletsBlow {
+      from { transform: translate(-20px, 8px); opacity: 0.9; }
+      to { transform: translate(62px, -12px); opacity: 0.08; }
+    }
+
+    @media (max-width: 820px) {
+      .drive-scene::before,
+      .exit-scene::before {
+        top: 82px;
+        height: 170px;
+      }
+
+      .drive-scene::after,
+      .exit-scene::after {
+        top: 192px;
+      }
+
+      .wash-building {
+        right: 16px;
+        width: 250px;
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .wash-building {
+        width: 210px;
+        height: 250px;
+      }
+
+      .title-wash-bay::before {
+        font-size: 1.06rem;
+      }
+    }
+
+    .title-wash-bay {
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+      z-index: 3;
+    }
+
+    .title-wash-bay::before,
+    .title-wash-bay::after {
+      content: none;
+    }
+
+    .portal-top,
+    .portal-column,
+    .portal-opening,
+    .portal-nozzles {
+      position: absolute;
+      display: block;
+    }
+
+    .portal-top {
+      left: 5%;
+      right: 5%;
+      top: 0;
+      height: 104px;
+      border: 7px solid #6f1018;
+      border-radius: 28px 28px 12px 12px;
+      background:
+        linear-gradient(90deg, #a9111b, #ec3440 18%, #f9f9fb 28%, #f9f9fb 72%, #ec3440 82%, #a9111b),
+        linear-gradient(#ff5c62, #b80f1c);
+      box-shadow:
+        inset 0 0 0 8px rgba(255,255,255,0.16),
+        inset 0 -16px 0 rgba(80,0,0,0.18),
+        0 15px 0 rgba(17,25,35,0.24);
+      z-index: 5;
+    }
+
+    .portal-top::before {
+      content: "Car Washer";
+      position: absolute;
+      left: 25%;
+      right: 25%;
+      top: 22px;
+      display: grid;
+      place-items: center;
+      height: 46px;
+      border: 4px solid #111923;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(90deg, #152235, #33485f, #152235);
+      font-family: Arial, "Hiragino Maru Gothic ProN", sans-serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: 0;
+      box-shadow: 0 0 18px rgba(255,242,122,0.5);
+    }
+
+    .portal-column {
+      top: 78px;
+      width: 22%;
+      bottom: 0;
+      border: 7px solid #6f1018;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.24), transparent 38%, rgba(0,0,0,0.16)),
+        linear-gradient(#ef3f47, #a80f19);
+      box-shadow:
+        inset 0 0 0 8px rgba(255,255,255,0.13),
+        0 14px 0 rgba(17,25,35,0.22);
+      z-index: 4;
+    }
+
+    .portal-column.left {
+      left: 0;
+      border-radius: 18px 8px 8px 18px;
+    }
+
+    .portal-column.right {
+      right: 0;
+      border-radius: 8px 18px 18px 8px;
+    }
+
+    .portal-opening {
+      left: 19%;
+      right: 19%;
+      top: 104px;
+      bottom: 34px;
+      border: 6px solid #111923;
+      border-radius: 10px;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.14), transparent 34%),
+        linear-gradient(#2c3b4b, #111923);
+      box-shadow:
+        inset 0 0 30px rgba(0,0,0,0.66),
+        inset 20px 0 0 rgba(255,255,255,0.05),
+        inset -20px 0 0 rgba(255,255,255,0.05);
+      z-index: 1;
+    }
+
+    .portal-nozzles {
+      left: 26%;
+      right: 26%;
+      top: 114px;
+      height: 18px;
+      background:
+        radial-gradient(circle, #dbe4ee 0 5px, #111923 6px 8px, transparent 9px) 0 0 / 28px 18px;
+      z-index: 6;
+    }
+
+    .title-bay-light {
+      top: 96px;
+      left: 27%;
+      right: 27%;
+      z-index: 7;
+    }
+
+    .title-bay-brush {
+      top: 142px;
+      width: 48px;
+      height: 154px;
+      z-index: 8;
+      background:
+        repeating-linear-gradient(92deg, rgba(255,255,255,0.8) 0 4px, transparent 4px 10px),
+        repeating-linear-gradient(0deg, #f7fbff 0 8px, #5b9ee8 8px 16px, #d92842 16px 25px);
+      box-shadow: inset -8px 0 12px rgba(0,0,0,0.18), 0 12px 10px rgba(0,0,0,0.22);
+    }
+
+    .title-bay-brush.left { left: 23%; }
+    .title-bay-brush.right { right: 23%; }
+
+    .city-layer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 242px;
+      height: 162px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .house,
+    .building-tower {
+      position: absolute;
+      bottom: 0;
+      display: block;
+      border: 4px solid #28313c;
+      box-shadow: 0 8px 0 rgba(17,25,35,0.14);
+    }
+
+    .house {
+      width: 112px;
+      height: 72px;
+      background:
+        linear-gradient(90deg, transparent 0 36%, #5f7895 36% 60%, transparent 60% 100%),
+        linear-gradient(#fff1d1, #f4d492);
+      border-radius: 4px;
+    }
+
+    .house::before {
+      content: "";
+      position: absolute;
+      left: -8px;
+      right: -8px;
+      top: -44px;
+      height: 54px;
+      background: #d45c4f;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      border: 4px solid #28313c;
+      border-bottom: 0;
+    }
+
+    .house::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 18px;
+      width: 22px;
+      height: 20px;
+      border: 3px solid #28313c;
+      background: #aee9ff;
+      box-shadow: 58px 0 0 #aee9ff, 58px 0 0 3px #28313c;
+    }
+
+    .h1 { left: 6%; transform: scale(0.92); }
+    .h2 { left: 22%; transform: scale(0.78); }
+    .h3 { right: 7%; transform: scale(0.86); }
+
+    .building-tower {
+      width: 90px;
+      height: 136px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.22), transparent 26%),
+        repeating-linear-gradient(0deg, transparent 0 18px, rgba(255,255,255,0.24) 18px 22px),
+        repeating-linear-gradient(90deg, #b8c4d1 0 20px, #8fa0b0 20px 40px);
+      border-radius: 6px 6px 0 0;
+    }
+
+    .building-tower::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: -28px;
+      height: 28px;
+      background: #6f7d8b;
+      border: 4px solid #28313c;
+      border-bottom: 0;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .t1 { left: 39%; height: 124px; }
+    .t2 { left: 50%; height: 154px; width: 104px; }
+
+    .bird {
+      position: absolute;
+      width: 32px;
+      height: 16px;
+      border-top: 3px solid #28313c;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .bird::after {
+      content: "";
+      position: absolute;
+      right: -25px;
+      top: -3px;
+      width: 32px;
+      height: 16px;
+      border-top: 3px solid #28313c;
+      border-radius: 50%;
+    }
+
+    .bird.b1 { top: 76px; left: 34%; transform: scale(0.8) rotate(4deg); }
+    .bird.b2 { top: 118px; left: 62%; transform: scale(0.62) rotate(-5deg); }
+
+    .wash-building {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      overflow: visible;
+      z-index: 4;
+    }
+
+    .wash-building::before,
+    .wash-building::after {
+      content: none;
+    }
+
+    .wash-portal-roof,
+    .wash-portal-column,
+    .wash-portal-opening,
+    .wash-portal-brush,
+    .wash-portal-rail {
+      position: absolute;
+      display: block;
+    }
+
+    .wash-portal-roof {
+      left: 5%;
+      right: 5%;
+      top: 0;
+      height: 74px;
+      border: 6px solid #6f1018;
+      border-radius: 22px 22px 10px 10px;
+      background:
+        linear-gradient(90deg, #a9111b, #ee3943 17%, #f8fafc 30%, #f8fafc 70%, #ee3943 83%, #a9111b);
+      box-shadow: inset 0 0 0 7px rgba(255,255,255,0.16), 0 12px 0 rgba(17,25,35,0.2);
+      z-index: 5;
+    }
+
+    .wash-portal-column {
+      top: 58px;
+      bottom: 20px;
+      width: 23%;
+      border: 6px solid #6f1018;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.22), transparent 38%, rgba(0,0,0,0.18)),
+        linear-gradient(#ef3f47, #a70f19);
+      box-shadow: inset 0 0 0 7px rgba(255,255,255,0.13), 0 12px 0 rgba(17,25,35,0.18);
+      z-index: 4;
+    }
+
+    .wash-portal-column.left { left: 0; border-radius: 16px 8px 8px 16px; }
+    .wash-portal-column.right { right: 0; border-radius: 8px 16px 16px 8px; }
+
+    .wash-portal-opening {
+      left: 20%;
+      right: 20%;
+      top: 78px;
+      bottom: 32px;
+      border: 5px solid #111923;
+      border-radius: 8px;
+      background:
+        radial-gradient(ellipse at 50% 34%, rgba(255,255,255,0.13), transparent 34%),
+        linear-gradient(#2a3949, #111923);
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
+      z-index: 1;
+    }
+
+    .wash-portal-brush {
+      top: 104px;
+      width: 32px;
+      height: 112px;
+      border: 4px solid #111923;
+      border-radius: 26px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.72) 0 3px, transparent 3px 8px),
+        repeating-linear-gradient(0deg, #f7fbff 0 7px, #5b9ee8 7px 15px, #d92842 15px 24px);
+      z-index: 7;
+    }
+
+    .wash-portal-brush.left { left: 24%; }
+    .wash-portal-brush.right { right: 24%; }
+
+    .wash-portal-rail {
+      left: 18%;
+      right: 18%;
+      bottom: 0;
+      height: 28px;
+      border-top: 4px solid #28313c;
+      border-bottom: 4px solid #28313c;
+      background: repeating-linear-gradient(90deg, #697582 0 24px, #46515d 24px 48px);
+      z-index: 3;
+    }
+
+    .phone-mini::before {
+      left: 13px;
+      top: 1px;
+      width: 28px;
+      height: 42px;
+      border: 3px solid #111923;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 88%, #111923 0 3px, transparent 4px),
+        linear-gradient(#172333 0 11%, #aee9ff 11% 74%, #f8fbff 74% 100%);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25);
+    }
+
+    .phone-mini::after {
+      content: "";
+      position: absolute;
+      left: 42px;
+      top: 9px;
+      width: 22px;
+      height: 22px;
+      border: 4px solid #2d8bd8;
+      border-left: 0;
+      border-bottom: 0;
+      border-radius: 5px;
+      transform: rotate(45deg);
+      box-shadow: 9px -9px 0 -6px #2d8bd8, 17px -17px 0 -13px #2d8bd8;
+    }
+
+    .pay-machine::before,
+    .pay-machine::after {
+      content: none;
+    }
+
+    .pay-machine {
+      background:
+        linear-gradient(90deg, #171d26 0 72%, #343e4b 72% 76%, #c9202c 76% 100%);
+      border-radius: 10px;
+      box-shadow:
+        inset 0 0 0 6px rgba(255,255,255,0.05),
+        0 14px 0 rgba(17,25,35,0.28);
+    }
+
+    .pay-screen {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 138px;
+      height: 92px;
+      border: 5px solid #06080b;
+      border-radius: 8px;
+      background:
+        linear-gradient(#263244 0 24%, #f4f0df 24% 100%);
+      box-shadow: inset 0 0 0 5px #3a4554;
+    }
+
+    .pay-screen::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: 38px;
+      height: 12px;
+      border-radius: 12px;
+      background: #c9202c;
+      box-shadow: 0 22px 0 #3eaf6f;
+    }
+
+    .machine-slot {
+      position: absolute;
+      left: 28px;
+      top: 142px;
+      width: 116px;
+      height: 34px;
+      border: 4px solid #06080b;
+      border-radius: 9px;
+      background:
+        linear-gradient(#eef2f6, #aab6c3);
+      box-shadow: inset 0 -8px 0 rgba(17,25,35,0.18);
+    }
+
+    .machine-slot::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 9px;
+      height: 8px;
+      border-radius: 8px;
+      background: #06080b;
+    }
+
+    .machine-touch {
+      position: absolute;
+      left: 34px;
+      top: 206px;
+      width: 104px;
+      height: 76px;
+      border: 4px solid #06080b;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 72% 30%, rgba(255,255,255,0.9), transparent 15%),
+        linear-gradient(#eaf8ff, #9fd7ee);
+      box-shadow: inset 0 -9px 0 rgba(17,25,35,0.12);
+    }
+
+    .machine-touch::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: 18px;
+      width: 30px;
+      height: 30px;
+      border: 5px solid #2d8bd8;
+      border-left: 0;
+      border-bottom: 0;
+      border-radius: 7px;
+      transform: rotate(45deg);
+      box-shadow: 12px -12px 0 -8px #2d8bd8, 23px -23px 0 -18px #2d8bd8;
+    }
+
+    .machine-receipt {
+      position: absolute;
+      right: 18px;
+      top: 38px;
+      width: 38px;
+      height: 86px;
+      border: 4px solid #06080b;
+      border-radius: 8px;
+      background: #f7fbff;
+      box-shadow: inset 0 -10px 0 #d8e1eb;
+    }
+
+    .pay-target {
+      right: 54px;
+      top: 144px;
+      width: 128px;
+      height: 74px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: transparent;
+      pointer-events: none;
+    }
+
+    .pay-target::before,
+    .pay-target::after,
+    .pay-target[data-method="cash"]::before,
+    .pay-target[data-method="cash"]::after,
+    .pay-target[data-method="phone"]::before,
+    .pay-target[data-method="phone"]::after,
+    .pay-target[data-method="card"]::before,
+    .pay-target[data-method="card"]::after {
+      content: none;
+    }
+
+    .pay-target[data-method="cash"] {
+      top: 136px;
+      height: 52px;
+    }
+
+    .pay-target[data-method="phone"],
+    .pay-target[data-method="card"] {
+      top: 196px;
+      height: 96px;
+    }
+
+    .wash-gate {
+      z-index: 2;
+    }
+
+    .wash-front-frame {
+      z-index: 10;
+    }
+
+    .wash-car {
+      z-index: 14;
+    }
+
+    .brush {
+      z-index: 21;
+    }
+
+    .foam-layer,
+    .spray-layer,
+    .dry-layer,
+    .shine-layer {
+      z-index: 24;
+    }
+
+    .top-nozzle {
+      z-index: 25;
+    }
+
+    .wash-scene .wash-gate {
+      z-index: 10;
+    }
+
+    .wash-scene .wash-car {
+      z-index: 30;
+    }
+
+    .wash-scene .wash-front-frame {
+      z-index: 40;
+    }
+
+    .wash-scene .brush {
+      z-index: 45;
+    }
+
+    .wash-scene .foam-layer,
+    .wash-scene .spray-layer,
+    .wash-scene .dry-layer,
+    .wash-scene .shine-layer {
+      left: 50%;
+      top: 202px;
+      width: min(52vw, 460px);
+      height: 326px;
+      margin-left: max(-26vw, -230px);
+      overflow: hidden;
+      border-radius: 18px;
+      z-index: 80;
+    }
+
+    .wash-scene .top-nozzle {
+      z-index: 85;
+    }
+
+    .wash-scene .sparkle-layer {
+      z-index: 90;
+    }
+
+    @media (max-width: 820px) {
+      .wash-scene .foam-layer,
+      .wash-scene .spray-layer,
+      .wash-scene .dry-layer,
+      .wash-scene .shine-layer {
+        top: 196px;
+        width: min(68vw, 430px);
+        margin-left: max(-34vw, -215px);
+        height: 292px;
+      }
+
+      .portal-top {
+        height: 84px;
+      }
+
+      .portal-column {
+        top: 64px;
+      }
+
+      .portal-opening {
+        top: 88px;
+      }
+
+      .city-layer {
+        bottom: 210px;
+        transform: scale(0.82);
+        transform-origin: center bottom;
+      }
+
+      .pay-screen {
+        width: 104px;
+      }
+
+      .machine-slot {
+        width: 94px;
+      }
+
+      .machine-touch {
+        width: 88px;
+      }
+
+      .machine-receipt {
+        right: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="screen title-screen active" id="titleScreen">
+      <div class="title-wrap">
+        <div class="title-art" aria-hidden="true">
+          <div class="title-wash-bay">
+            <span class="portal-top"></span>
+            <span class="portal-column left"></span>
+            <span class="portal-column right"></span>
+            <span class="portal-opening"></span>
+            <span class="portal-nozzles"></span>
+            <span class="title-bay-light"></span>
+            <span class="title-bay-brush left"></span>
+            <span class="title-bay-brush right"></span>
+          </div>
+          <div class="title-foam"></div>
+          <div class="title-rail"></div>
+          <div class="wash-sign">Car Wash</div>
+        </div>
+        <div class="title-menu" aria-label="メニュー">
+          <h1>ぴかぴか<br>せんしゃ</h1>
+          <button class="big-button" id="startButton" type="button">せんしゃスタート</button>
+          <button class="big-button" id="listButton" type="button">くるまいちらん</button>
+          <button class="big-button" id="paradeButton" type="button">パレード</button>
+          <button class="big-button" id="endButton" type="button">おわる</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="selectScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>くるまを えらんでね</h2>
+        <span></span>
+      </div>
+      <div class="grid" id="selectGrid"></div>
+    </section>
+
+    <section class="screen" id="driveScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>せんしゃじょうへ ごー！</h2>
+        <span></span>
+      </div>
+      <div class="drive-scene">
+        <div class="sun"></div>
+        <div class="cloud one"></div>
+        <div class="cloud two"></div>
+        <div class="bird b1"></div>
+        <div class="bird b2"></div>
+        <div class="city-layer" aria-hidden="true">
+          <span class="house h1"></span>
+          <span class="house h2"></span>
+          <span class="building-tower t1"></span>
+          <span class="building-tower t2"></span>
+          <span class="house h3"></span>
+        </div>
+        <div class="wash-building" aria-hidden="true">
+          <span class="wash-portal-roof"></span>
+          <span class="wash-portal-column left"></span>
+          <span class="wash-portal-column right"></span>
+          <span class="wash-portal-opening"></span>
+          <span class="wash-portal-brush left"></span>
+          <span class="wash-portal-brush right"></span>
+          <span class="wash-portal-rail"></span>
+        </div>
+        <div class="road-line"></div>
+        <div class="drive-car-wrap dirty" id="driveCarWrap">
+          <img id="driveCar" src="assets/side/fire-truck.png" alt="">
+        </div>
+      </div>
+      <div class="scene-caption" id="driveCaption">すこし よごれた くるまが はしるよ</div>
+    </section>
+
+    <section class="screen" id="receptionScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>せんしゃ うけつけ</h2>
+        <span></span>
+      </div>
+      <div class="reception-layout">
+        <div class="panel terminal-panel">
+          <div class="terminal-shell">
+            <div class="terminal-steps" aria-hidden="true">
+              <span>はらいかた</span>
+              <span class="is-now">コース</span>
+              <span>オプション</span>
+              <span>そうびひん</span>
+              <span>にゅうきん</span>
+              <span>おわり</span>
+            </div>
+            <div class="terminal-title">コースを えらんでね</div>
+            <div class="terminal-section">
+              <div class="course-grid" id="courseGrid"></div>
+              <div class="terminal-subtitle">オプション</div>
+              <div class="option-grid" id="optionGrid"></div>
+              <div class="terminal-subtitle">はらいかた</div>
+              <div class="payment-grid" id="paymentGrid"></div>
+            </div>
+            <div class="total-board">
+              <span>ごうけい</span>
+              <span id="totalPrice">300えん</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel kiosk-panel">
+          <h3>おかねを はらおう</h3>
+          <div class="pay-yard" id="payYard">
+            <div class="pay-help" id="payHelp">はらいかたを えらんでね</div>
+            <div class="pay-machine" aria-hidden="true">
+              <span class="pay-screen"></span>
+              <span class="machine-slot"></span>
+              <span class="machine-touch"></span>
+              <span class="machine-receipt"></span>
+            </div>
+            <div class="pay-target" id="payTarget">ここへ</div>
+            <div class="pay-item" id="payItem" hidden></div>
+          </div>
+          <div class="start-wash-row">
+            <button class="big-button" type="button" id="washStartButton" disabled>せんしゃ スタート</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="washScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>せんしゃきで あらうよ</h2>
+        <span></span>
+      </div>
+      <div class="wash-scene" id="washScene">
+        <div class="traffic-light" aria-label="しんごう">
+          <div class="light-row">
+            <span class="light red" id="redLight"></span>
+            <span class="light green on" id="greenLight"></span>
+          </div>
+          <span id="signalText">すすんで</span>
+        </div>
+        <div class="wash-rail" aria-hidden="true"></div>
+        <div class="wash-gate">
+          <div class="bay-light"></div>
+          <div class="top-nozzle"></div>
+          <div class="brush left"></div>
+          <div class="brush right"></div>
+          <div class="machine-floor"></div>
+        </div>
+        <img class="wash-car" id="washCar" src="assets/back/fire-truck_back.png" alt="">
+        <div class="wash-front-frame" aria-hidden="true"></div>
+        <div class="foam-layer"></div>
+        <div class="spray-layer"></div>
+        <div class="dry-layer"></div>
+        <div class="shine-layer"></div>
+        <div class="sparkle-layer" id="sparkleLayer"></div>
+      </div>
+      <div class="wash-steps" id="washSteps">
+        <div class="wash-step" data-step="すすむ">すすむ</div>
+        <div class="wash-step" data-step="あわ">あわ</div>
+        <div class="wash-step" data-step="ブラシ">ブラシ</div>
+        <div class="wash-step" data-step="みず">みず</div>
+        <div class="wash-step" data-step="かんそう">かんそう</div>
+      </div>
+      <div class="scene-caption" id="washCaption">タッチすると キラキラするよ</div>
+    </section>
+
+    <section class="screen" id="exitDriveScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>ぴかぴかで しゅっぱつ！</h2>
+        <span></span>
+      </div>
+      <div class="exit-scene">
+        <div class="sun"></div>
+        <div class="cloud one"></div>
+        <div class="cloud two"></div>
+        <div class="bird b1"></div>
+        <div class="bird b2"></div>
+        <div class="city-layer" aria-hidden="true">
+          <span class="house h1"></span>
+          <span class="house h2"></span>
+          <span class="building-tower t1"></span>
+          <span class="building-tower t2"></span>
+          <span class="house h3"></span>
+        </div>
+        <div class="wash-building" aria-hidden="true">
+          <span class="wash-portal-roof"></span>
+          <span class="wash-portal-column left"></span>
+          <span class="wash-portal-column right"></span>
+          <span class="wash-portal-opening"></span>
+          <span class="wash-portal-brush left"></span>
+          <span class="wash-portal-brush right"></span>
+          <span class="wash-portal-rail"></span>
+        </div>
+        <div class="road-line"></div>
+        <div class="exit-car-wrap" id="exitCarWrap">
+          <img id="exitCar" src="assets/side/fire-truck.png" alt="">
+        </div>
+      </div>
+      <div class="scene-caption" id="exitCaption">きれいに なって はしるよ</div>
+    </section>
+
+    <section class="screen" id="completeScreen">
+      <div class="complete-wrap">
+        <img class="complete-car" id="completeCar" src="assets/side/fire-truck.png" alt="">
+        <div class="complete-message">
+          <h2>せんしゃ<br>かんりょう</h2>
+          <p>うまくできたね！</p>
+          <button class="big-button" type="button" id="againButton">つぎの くるま</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="listScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>くるまいちらん</h2>
+        <span></span>
+      </div>
+      <div class="grid" id="listGrid"></div>
+    </section>
+
+    <section class="screen" id="paradeScreen">
+      <div class="topbar">
+        <button class="small-button" type="button" data-title>もどる</button>
+        <h2>くるま パレード</h2>
+        <button class="small-button" type="button" id="paradeAgainButton">もういちど</button>
+      </div>
+      <div class="parade-scene">
+        <div class="sun"></div>
+        <div class="cloud one"></div>
+        <div class="cloud two"></div>
+        <div class="parade-road-line"></div>
+        <div class="parade-stage" id="paradeStage"></div>
+      </div>
+      <div class="scene-caption">みんなで はしるよ</div>
+    </section>
+
+    <section class="screen end-screen" id="endScreen">
+      <div class="end-box">
+        <h2>おしまい</h2>
+        <p>また あそぼうね</p>
+        <button class="big-button" type="button" data-title>タイトルへ</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const vehicles = [
+      { id: "fire-truck", name: "しょうぼうしゃ", desc: "かじのときに だいかつやく！", side: "assets/side/fire-truck.png", back: "assets/back/fire-truck_back.png", ready: true },
+      { id: "ambulance", name: "きゅうきゅうしゃ", desc: "けがをしたひとを はこぶよ", side: "assets/side/ambulance.png", back: "assets/back/ambulance_back.png", ready: true },
+      { id: "police-car", name: "パトカー", desc: "まちのあんぜんを まもるよ", side: "assets/side/police-car.png", back: "assets/back/police-car_back.png", ready: true },
+      { id: "bus", name: "バス", desc: "みんなを のせて はしるよ", side: "assets/side/bus.png", back: "assets/back/bus_back.png", ready: true },
+      { id: "truck", name: "トラック", desc: "おおきなにもつを はこぶよ", side: "assets/side/truck.png", back: "assets/back/truck_back.png", ready: true },
+      { id: "taxi", name: "タクシー", desc: "いきたいところへ つれていくよ", side: "assets/side/taxi.png", back: "assets/back/taxi_back.png", ready: true },
+      { id: "bulldozer", name: "ブルドーザー", desc: "じめんを たいらにするよ", side: "assets/side/bulldozer.png", back: "assets/back/bulldozer_back.png", ready: true },
+      { id: "crane-truck", name: "クレーンしゃ", desc: "おもいものを もちあげるよ", side: "assets/side/crane-truck.png", back: "assets/back/crane-truck_back.png", ready: false },
+      { id: "garbage-truck", name: "ごみしゅうしゅうしゃ", desc: "まちを きれいにするよ", side: "assets/side/garbage-truck.png", back: "assets/back/garbage-truck_back.png", ready: true },
+      { id: "forklift", name: "フォークリフト", desc: "にもつを もちあげて はこぶよ", side: "assets/side/forklift.png", back: "assets/back/forklift_back.png", ready: true },
+      { id: "delivery-van", name: "たくはいしゃ", desc: "おうちに にもつを とどけるよ", side: "assets/side/delivery-van.png", back: "assets/back/delivery-van_back.png", ready: true },
+      { id: "dump-truck", name: "ダンプカー", desc: "つちやいしを たくさん はこぶよ", side: "assets/side/dump-truck.png", back: "assets/back/dump-truck_back.png", ready: true },
+      { id: "mixer-truck", name: "ミキサーしゃ", desc: "コンクリートを まぜながら はしるよ", side: "assets/side/mixer-truck.png", back: "assets/back/mixer-truck_back.png", ready: true }
+    ];
+
+    const courses = [
+      { id: "water", label: "みずあらい", price: 300 },
+      { id: "wax", label: "ワックスせんしゃ", price: 500 },
+      { id: "coat", label: "はっすいせんしゃ", price: 700 },
+      { id: "premium", label: "こうきゅうせんしゃ", price: 1500 }
+    ];
+
+    const options = [
+      { id: "careWash", label: "ていねい せんしゃ", price: 200 },
+      { id: "careDry", label: "ていねい かんそう", price: 200 }
+    ];
+
+    const payments = [
+      { id: "cash", label: "げんきん", target: "コインいれ" },
+      { id: "phone", label: "スマホ", target: "タッチ" },
+      { id: "card", label: "カード", target: "タッチ" }
+    ];
+
+    const readyVehicles = vehicles.filter((car) => car.ready);
+    const screens = [...document.querySelectorAll(".screen")];
+    const selectGrid = document.getElementById("selectGrid");
+    const listGrid = document.getElementById("listGrid");
+    const courseGrid = document.getElementById("courseGrid");
+    const optionGrid = document.getElementById("optionGrid");
+    const paymentGrid = document.getElementById("paymentGrid");
+    const totalPrice = document.getElementById("totalPrice");
+    const payYard = document.getElementById("payYard");
+    const payHelp = document.getElementById("payHelp");
+    const payTarget = document.getElementById("payTarget");
+    const payItem = document.getElementById("payItem");
+    const washStartButton = document.getElementById("washStartButton");
+    const driveCar = document.getElementById("driveCar");
+    const driveCarWrap = document.getElementById("driveCarWrap");
+    const driveCaption = document.getElementById("driveCaption");
+    const exitCar = document.getElementById("exitCar");
+    const exitCarWrap = document.getElementById("exitCarWrap");
+    const exitCaption = document.getElementById("exitCaption");
+    const washScene = document.getElementById("washScene");
+    const washCar = document.getElementById("washCar");
+    const washCaption = document.getElementById("washCaption");
+    const sparkleLayer = document.getElementById("sparkleLayer");
+    const redLight = document.getElementById("redLight");
+    const greenLight = document.getElementById("greenLight");
+    const signalText = document.getElementById("signalText");
+    const completeCar = document.getElementById("completeCar");
+    const paradeStage = document.getElementById("paradeStage");
+
+    let selectedCar = readyVehicles[0];
+    let selectedCourse = courses[0].id;
+    let selectedOptions = new Set();
+    let selectedPayment = "";
+    let paymentDone = false;
+    let timers = [];
+    let audioContext;
+    let melodyTimers = [];
+    let melodyOscillators = [];
+
+    function later(callback, ms) {
+      const id = window.setTimeout(callback, ms);
+      timers.push(id);
+      return id;
+    }
+
+    function clearTimers() {
+      timers.forEach((id) => window.clearTimeout(id));
+      timers = [];
+    }
+
+    function showScreen(id) {
+      clearTimers();
+      stopMelody();
+      screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
+    function yen(value) {
+      return `${value.toLocaleString("ja-JP")}えん`;
+    }
+
+    function getCourse() {
+      return courses.find((course) => course.id === selectedCourse) || courses[0];
+    }
+
+    function getAudio() {
+      const AudioClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioClass) return null;
+      if (!audioContext) audioContext = new AudioClass();
+      if (audioContext.state === "suspended") audioContext.resume();
+      return audioContext;
+    }
+
+    function tone(frequency, start, duration, type = "sine", volume = 0.08) {
+      const ctx = getAudio();
+      if (!ctx) return null;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.03);
+      return oscillator;
+    }
+
+    function playCoin() {
+      const ctx = getAudio();
+      if (!ctx) return;
+      tone(880, ctx.currentTime, 0.12, "triangle", 0.1);
+      tone(1320, ctx.currentTime + 0.09, 0.16, "triangle", 0.08);
+    }
+
+    function playPop() {
+      const ctx = getAudio();
+      if (!ctx) return;
+      tone(520, ctx.currentTime, 0.08, "sine", 0.06);
+      tone(780, ctx.currentTime + 0.06, 0.1, "sine", 0.05);
+    }
+
+    function playSparkle() {
+      const ctx = getAudio();
+      if (!ctx) return;
+      tone(1200, ctx.currentTime, 0.08, "sine", 0.045);
+      tone(1680, ctx.currentTime + 0.05, 0.08, "sine", 0.04);
+      tone(2100, ctx.currentTime + 0.1, 0.1, "sine", 0.035);
+    }
+
+    function playMoveSound() {
+      const ctx = getAudio();
+      if (!ctx) return;
+      tone(160, ctx.currentTime, 0.4, "sawtooth", 0.025);
+      tone(205, ctx.currentTime + 0.22, 0.4, "sawtooth", 0.022);
+    }
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ja-JP";
+      utterance.rate = 0.85;
+      utterance.pitch = 1.2;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function playParadeMelody() {
+      stopMelody();
+      const ctx = getAudio();
+      if (!ctx) return;
+      const noteMap = { c5: 523.25, d5: 587.33, e5: 659.25, g5: 783.99, a5: 880, c6: 1046.5 };
+      const notes = [
+        ["c5", 0.18], ["e5", 0.18], ["g5", 0.22], ["e5", 0.18],
+        ["d5", 0.18], ["g5", 0.22], ["a5", 0.24], ["g5", 0.24],
+        ["e5", 0.18], ["g5", 0.18], ["c6", 0.28], ["a5", 0.2],
+        ["g5", 0.18], ["e5", 0.2], ["d5", 0.24], ["c5", 0.32]
+      ];
+      let cursor = ctx.currentTime + 0.04;
+      const playLoop = () => {
+        cursor = ctx.currentTime + 0.04;
+        notes.forEach(([name, duration]) => {
+          const oscillator = tone(noteMap[name], cursor, duration, "square", 0.035);
+          if (oscillator) melodyOscillators.push(oscillator);
+          cursor += duration + 0.035;
+        });
+      };
+      playLoop();
+      const loopLength = 4200;
+      melodyTimers.push(window.setInterval(playLoop, loopLength));
+    }
+
+    function stopMelody() {
+      melodyTimers.forEach((id) => window.clearInterval(id));
+      melodyTimers = [];
+      melodyOscillators.forEach((oscillator) => {
+        try { oscillator.stop(); } catch (error) {}
+      });
+      melodyOscillators = [];
+    }
+
+    function renderCars() {
+      selectGrid.innerHTML = "";
+      readyVehicles.forEach((car) => {
+        const button = document.createElement("button");
+        button.className = "car-card";
+        button.type = "button";
+        button.innerHTML = `<img src="${car.side}" alt=""><strong>${car.name}</strong>`;
+        button.addEventListener("click", () => {
+          selectedCar = car;
+          playPop();
+          startDrive();
+        });
+        selectGrid.appendChild(button);
+      });
+
+      listGrid.innerHTML = "";
+      vehicles.forEach((car) => {
+        const item = document.createElement("article");
+        item.className = "car-card";
+        const image = car.ready
+          ? `<img src="${car.side}" alt="">`
+          : `<div class="no-image">えを<br>いれてね</div>`;
+        item.innerHTML = `${image}<strong>${car.name}</strong><p>${car.desc}</p>`;
+        listGrid.appendChild(item);
+      });
+    }
+
+    function renderReception() {
+      courseGrid.innerHTML = "";
+      courses.forEach((course) => {
+        const button = document.createElement("button");
+        button.className = "choice-button course-card";
+        button.type = "button";
+        button.dataset.course = course.id;
+        button.innerHTML = `
+          <span class="course-name">${course.label}</span>
+          <span class="course-art ${course.id}-art" aria-hidden="true">${courseArt(course.id)}</span>
+          <span class="course-price">${course.price.toLocaleString("ja-JP")}<small>えん</small></span>
+        `;
+        button.classList.toggle("is-selected", course.id === selectedCourse);
+        button.addEventListener("click", () => {
+          selectedCourse = course.id;
+          playPop();
+          renderReception();
+        });
+        courseGrid.appendChild(button);
+      });
+
+      optionGrid.innerHTML = "";
+      options.forEach((option) => {
+        const button = document.createElement("button");
+        button.className = "choice-button option-card";
+        button.type = "button";
+        button.textContent = `${option.label} +${yen(option.price)}`;
+        button.classList.toggle("is-selected", selectedOptions.has(option.id));
+        button.addEventListener("click", () => {
+          if (selectedOptions.has(option.id)) selectedOptions.delete(option.id);
+          else selectedOptions.add(option.id);
+          playPop();
+          renderReception();
+        });
+        optionGrid.appendChild(button);
+      });
+
+      paymentGrid.innerHTML = "";
+      payments.forEach((payment) => {
+        const button = document.createElement("button");
+        button.className = "choice-button payment-card";
+        button.type = "button";
+        button.innerHTML = `<span>${payment.label}</span>${paymentMiniIcon(payment.id)}`;
+        button.classList.toggle("is-selected", payment.id === selectedPayment);
+        button.addEventListener("click", () => choosePayment(payment.id));
+        paymentGrid.appendChild(button);
+      });
+
+      const optionTotal = [...selectedOptions].reduce((sum, optionId) => {
+        const option = options.find((item) => item.id === optionId);
+        return sum + (option ? option.price : 0);
+      }, 0);
+      totalPrice.textContent = yen(getCourse().price + optionTotal);
+    }
+
+    function showSelect() {
+      showScreen("selectScreen");
+    }
+
+    function courseArt(courseId) {
+      if (courseId === "water") {
+        return `
+          <span class="water-jet one"></span>
+          <span class="water-jet two"></span>
+          <span class="water-jet three"></span>
+        `;
+      }
+      if (courseId === "wax") {
+        return `
+          <span class="water-jet one"></span>
+          <span class="foam-dot one"></span>
+          <span class="foam-dot two"></span>
+          <span class="spark-dot one"></span>
+          <span class="spark-dot two"></span>
+        `;
+      }
+      if (courseId === "coat") {
+        return `
+          <span class="repel-arc"></span>
+          <span class="foam-dot one"></span>
+          <span class="water-jet one"></span>
+          <span class="water-jet three"></span>
+          <span class="spark-dot two"></span>
+        `;
+      }
+      return `
+        <span class="repel-arc"></span>
+        <span class="water-jet one"></span>
+        <span class="water-jet two"></span>
+        <span class="water-jet three"></span>
+        <span class="foam-dot one"></span>
+        <span class="foam-dot two"></span>
+        <span class="spark-dot one"></span>
+        <span class="spark-dot two"></span>
+        <span class="spark-dot three"></span>
+      `;
+    }
+
+    function paymentMiniIcon(paymentId) {
+      if (paymentId === "cash") return `<span class="pay-mini-icon cash-mini" aria-hidden="true"></span>`;
+      if (paymentId === "phone") return `<span class="pay-mini-icon phone-mini" aria-hidden="true"></span>`;
+      return `<span class="pay-mini-icon card-mini" aria-hidden="true"></span>`;
+    }
+
+    function startDrive() {
+      showScreen("driveScreen");
+      driveCar.src = selectedCar.side;
+      driveCar.alt = selectedCar.name;
+      driveCaption.textContent = `${selectedCar.name}が せんしゃじょうへ むかうよ`;
+      driveCarWrap.classList.remove("go");
+      driveCarWrap.classList.add("dirty");
+      void driveCarWrap.offsetWidth;
+      driveCarWrap.classList.add("go");
+      playMoveSound();
+      later(() => {
+        setupReception();
+      }, 5200);
+    }
+
+    function setupReception() {
+      selectedCourse = "water";
+      selectedOptions = new Set();
+      selectedPayment = "";
+      paymentDone = false;
+      payItem.hidden = true;
+      payItem.innerHTML = "";
+      payHelp.textContent = "はらいかたを えらんでね";
+      payTarget.textContent = "ここへ";
+      delete payTarget.dataset.method;
+      washStartButton.disabled = true;
+      renderReception();
+      showScreen("receptionScreen");
+    }
+
+    function choosePayment(paymentId) {
+      selectedPayment = paymentId;
+      paymentDone = false;
+      washStartButton.disabled = true;
+      renderReception();
+      const payment = payments.find((item) => item.id === paymentId);
+      payTarget.textContent = payment.target;
+      payTarget.dataset.method = paymentId;
+      payHelp.textContent = `${payment.label}を ${payment.target}へ はこんでね`;
+      payItem.hidden = false;
+      payItem.className = "pay-item";
+      payItem.style.left = "30px";
+      payItem.style.top = window.innerWidth < 820 ? "190px" : "108px";
+      payItem.innerHTML = iconForPayment(paymentId);
+      playPop();
+    }
+
+    function iconForPayment(paymentId) {
+      if (paymentId === "cash") return `<div class="coin"><span class="coin-mark">えん</span></div>`;
+      if (paymentId === "phone") return `<div class="phone" aria-label="スマホ"></div>`;
+      return `<div class="card-icon">カード</div>`;
+    }
+
+    function overlaps(a, b) {
+      const first = a.getBoundingClientRect();
+      const second = b.getBoundingClientRect();
+      return first.left < second.right &&
+        first.right > second.left &&
+        first.top < second.bottom &&
+        first.bottom > second.top;
+    }
+
+    function finishPayment() {
+      if (paymentDone) return;
+      paymentDone = true;
+      payItem.classList.add("is-paid");
+      washStartButton.disabled = false;
+      payHelp.textContent = "チャリン！ じゅんび できたよ";
+      playCoin();
+    }
+
+    function makePaymentDraggable() {
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      payItem.addEventListener("pointerdown", (event) => {
+        if (payItem.hidden || paymentDone) return;
+        dragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        startLeft = parseFloat(payItem.style.left || "0");
+        startTop = parseFloat(payItem.style.top || "0");
+        payItem.setPointerCapture(event.pointerId);
+      });
+
+      payItem.addEventListener("pointermove", (event) => {
+        if (!dragging) return;
+        const yard = payYard.getBoundingClientRect();
+        const item = payItem.getBoundingClientRect();
+        const nextLeft = startLeft + event.clientX - startX;
+        const nextTop = startTop + event.clientY - startY;
+        payItem.style.left = `${Math.max(0, Math.min(yard.width - item.width, nextLeft))}px`;
+        payItem.style.top = `${Math.max(0, Math.min(yard.height - item.height, nextTop))}px`;
+      });
+
+      payItem.addEventListener("pointerup", (event) => {
+        if (!dragging) return;
+        dragging = false;
+        payItem.releasePointerCapture(event.pointerId);
+        if (overlaps(payItem, payTarget)) finishPayment();
+      });
+    }
+
+    function setSignal(canGo) {
+      greenLight.classList.toggle("on", canGo);
+      redLight.classList.toggle("on", !canGo);
+      signalText.textContent = canGo ? "すすんで" : "とまって";
+    }
+
+    function setWashStep(label) {
+      document.querySelectorAll(".wash-step").forEach((step) => {
+        step.classList.toggle("is-active", step.dataset.step === label);
+      });
+    }
+
+    function clearWashEffects() {
+      washScene.classList.remove("foam-on", "brush-on", "spray-on", "dry-on", "shine-on");
+    }
+
+    function startWash() {
+      showScreen("washScreen");
+      clearWashEffects();
+      sparkleLayer.innerHTML = "";
+      washCar.src = selectedCar.back;
+      washCar.alt = selectedCar.name;
+      washCar.className = "wash-car entering";
+      setSignal(true);
+      setWashStep("すすむ");
+      washCaption.textContent = "ゆっくり すすむよ";
+      speak("せんしゃをうけつけました");
+      playMoveSound();
+
+      later(() => {
+        setSignal(false);
+        washCar.className = "wash-car washing";
+        washCaption.textContent = "あわで もこもこ";
+        setWashStep("あわ");
+        clearWashEffects();
+        washScene.classList.add("foam-on");
+      }, 2800);
+
+      later(() => {
+        washCaption.textContent = "ブラシで ごしごし";
+        setWashStep("ブラシ");
+        clearWashEffects();
+        washScene.classList.add("brush-on");
+      }, 5600);
+
+      later(() => {
+        washCaption.textContent = "みずで じゃー";
+        setWashStep("みず");
+        clearWashEffects();
+        washScene.classList.add("spray-on");
+      }, 8300);
+
+      later(() => {
+        washCaption.textContent = "かぜで かわかすよ";
+        setWashStep("かんそう");
+        clearWashEffects();
+        washScene.classList.add("dry-on");
+      }, 10700);
+
+      later(() => {
+        washCaption.textContent = "ぴかぴかに しあげるよ";
+        setWashStep("");
+        clearWashEffects();
+        washScene.classList.add("shine-on");
+        washCar.classList.add("clean");
+      }, 12900);
+
+      later(() => {
+        setSignal(true);
+        washCaption.textContent = "でぐちへ すすむよ";
+        clearWashEffects();
+        washCar.src = selectedCar.side;
+        washCar.className = "wash-car clean side-exit leaving";
+        playMoveSound();
+      }, 15100);
+
+      later(() => {
+        startExitDrive();
+      }, 18100);
+    }
+
+    function makeSparkle(event) {
+      const rect = sparkleLayer.getBoundingClientRect();
+      for (let i = 0; i < 8; i += 1) {
+        const sparkle = document.createElement("span");
+        sparkle.className = "sparkle";
+        sparkle.style.left = `${event.clientX - rect.left}px`;
+        sparkle.style.top = `${event.clientY - rect.top}px`;
+        sparkle.style.setProperty("--dx", `${Math.random() * 120 - 60}px`);
+        sparkle.style.setProperty("--dy", `${Math.random() * 120 - 70}px`);
+        sparkleLayer.appendChild(sparkle);
+        window.setTimeout(() => sparkle.remove(), 760);
+      }
+      playSparkle();
+    }
+
+    function startExitDrive() {
+      showScreen("exitDriveScreen");
+      exitCar.src = selectedCar.side;
+      exitCar.alt = selectedCar.name;
+      exitCaption.textContent = `${selectedCar.name}が ぴかぴかで はしるよ`;
+      exitCarWrap.classList.remove("go");
+      void exitCarWrap.offsetWidth;
+      exitCarWrap.classList.add("go");
+      playMoveSound();
+      later(() => {
+        showComplete();
+      }, 5200);
+    }
+
+    function showComplete() {
+      showScreen("completeScreen");
+      completeCar.src = selectedCar.side;
+      completeCar.alt = selectedCar.name;
+      playSparkle();
+      speak("せんしゃかんりょう、うまくできたね");
+      later(() => showSelect(), 4800);
+    }
+
+    function showList() {
+      showScreen("listScreen");
+    }
+
+    function showParade() {
+      showScreen("paradeScreen");
+      paradeStage.innerHTML = "";
+      readyVehicles.forEach((car, index) => {
+        const image = document.createElement("img");
+        image.className = "parade-car";
+        image.src = car.side;
+        image.alt = car.name;
+        image.style.setProperty("--i", index);
+        image.style.setProperty("--row", index % 4);
+        paradeStage.appendChild(image);
+      });
+      playParadeMelody();
+    }
+
+    function showEnd() {
+      showScreen("endScreen");
+      try { window.close(); } catch (error) {}
+    }
+
+    renderCars();
+    renderReception();
+    makePaymentDraggable();
+
+    document.getElementById("startButton").addEventListener("click", showSelect);
+    document.getElementById("listButton").addEventListener("click", showList);
+    document.getElementById("paradeButton").addEventListener("click", showParade);
+    document.getElementById("paradeAgainButton").addEventListener("click", showParade);
+    document.getElementById("endButton").addEventListener("click", showEnd);
+    document.getElementById("againButton").addEventListener("click", showSelect);
+    washStartButton.addEventListener("click", startWash);
+    washScene.addEventListener("pointerdown", makeSparkle);
+    document.querySelectorAll("[data-title]").forEach((button) => {
+      button.addEventListener("click", () => showScreen("titleScreen"));
+    });
+  </script>
+</body>
+</html>
